@@ -4,6 +4,10 @@ An attempt to build an honest, open early-warning capability for glacial hazards
 in Himalayan river corridors — starting from the 26 August 2026 Rasuwa
 (Nepal–Tibet border) disaster and the failures that preceded it.
 
+**Live workbench:** https://himalayashield.allgetz.com ·
+https://8h45k4r.github.io/Himalayashield/ — rebuilt every 6 hours from the
+USGS catalog; goes loudly OFFLINE rather than quietly stale.
+
 ## Read this first
 
 **Nothing in this repository is ready to warn anyone.** There is no sensor, no
@@ -31,9 +35,10 @@ a monitoring system reported as installed while the camera was dead and the
 breach sensor had never been fitted. A system that is silently absent is worse
 than no system, because it converts "we are not watching" into "nothing is
 happening." That principle is load-bearing everywhere here, down to the design
-tokens: `offline` is a first-class state, rendered in magenta deliberately
-outside the amber→orange→red hazard scale, always with a label and a shape,
-never colour alone.
+tokens: `offline` is a first-class state, rendered in purple measured to sit
+far outside the amber→orange→red hazard scale (ADR 0004 — the original
+magenta *felt* distinct and measured nearly identical to danger red), always
+with a label and a shape, never colour alone.
 
 ## Data honesty
 
@@ -69,6 +74,12 @@ as fact is not.
 
 - `data/` — event records with explicit provenance; see `data/README.md`
 - `docs/decisions/` — architecture decision records (ADRs)
+- `docs/PLAN.md` — the functional plan: architecture, free-tools stack, phases
+- `docs/GATES.md` — **the five gates** (UI/UX · Code · QA/QC · Documentation ·
+  VAPT) every change passes before merge
+- `docs/DATAVIZ.md` — how charts are built and colours are validated
+- `docs/RELEASE.md` — release & deployment (GitHub Pages + Cloudflare Workers)
+- `tools/` — the build pipeline and its tests
 - `web/` — design tokens and, later, the last-metre pages
 - `GOVERNANCE.md` — who decides what, and what a number needs before it is real
 - `CONTRIBUTING.md` — contributions route through the maintainer, Bhaskar

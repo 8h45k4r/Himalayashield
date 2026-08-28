@@ -7,9 +7,13 @@ pushed/filed directly. What remains needs a human in the GitHub UI.
 
 ## Done
 
-- [x] Repository created (private) and content pushed
+- [x] Repository created and content pushed; made public 2026-08-28 (ADR 0003)
 - [x] Six day-one issues filed (texts preserved below as the source of record)
-- [x] CI: JSON validation, provenance check, Tier 2 page budget
+- [x] CI: unit tests, JSON validation, provenance check, Tier 2 page budget
+- [x] Live workbench pipeline: `tools/build_site.py` → GitHub Pages
+      (auto-enabled by the Deploy workflow) + Cloudflare Workers, 6-hourly cron
+- [x] Five gates (docs/GATES.md) wired into the PR template and CI
+- [x] CodeQL + release workflow; CODEOWNERS routes everything to @8h45k4r
 
 ## Still manual (GitHub UI — Settings)
 
@@ -21,7 +25,11 @@ pushed/filed directly. What remains needs a human in the GitHub UI.
 3. **Topics** — the repo is public, so add them now (Repo page → About → ⚙):
    `glof`, `early-warning`, `himalaya`, `nepal`, `disaster-risk`,
    `carbon-design-system`.
-4. **License — now urgent.** A public repository with no license is
+4. **Cloudflare custom domain** — create an API token ("Edit Cloudflare
+   Workers" template, scoped to the `allgetz.com` zone) and add it as the
+   `CLOUDFLARE_API_TOKEN` Actions secret; the next Deploy run then publishes
+   https://himalayashield.allgetz.com automatically. Steps: docs/RELEASE.md.
+5. **License — now urgent.** A public repository with no license is
    all-rights-reserved: nobody may legally reuse anything here, which defeats
    the point of being public. It is still a decision, not boilerplate:
    Apache-2.0 is the likely candidate for code, CC BY 4.0 separately for
@@ -75,8 +83,8 @@ Weeks 3–4.
 ### 5. Operations console v0 (Carbon React, Tier 1)
 
 Duty-officer screen: corridor status board with the four states (normal /
-watch / warning / danger) plus first-class `offline`, dark theme, data-dense.
-Scope per ADR 0002. Weeks 5–6.
+watch / warning / danger) plus first-class `offline` (purple, per ADR 0004),
+dark theme, data-dense. Scope per ADR 0002. Weeks 5–6.
 
 ### 6. Last-metre page prototype (Tier 2)
 
