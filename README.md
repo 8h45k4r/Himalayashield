@@ -75,6 +75,8 @@ as fact is not.
 - `data/` — event records with explicit provenance; see `data/README.md`
 - `docs/decisions/` — architecture decision records (ADRs)
 - `docs/PLAN.md` — the functional plan: architecture, free-tools stack, phases
+- `docs/RESEARCH.md` — state of the art and the three gaps (sparse networks,
+  the missing High Mountain Asia corpus, the detection→warning bridge)
 - `docs/GATES.md` — **the five gates** (UI/UX · Code · QA/QC · Documentation ·
   VAPT) every change passes before merge
 - `docs/DATAVIZ.md` — how charts are built and colours are validated

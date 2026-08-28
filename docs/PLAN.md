@@ -85,11 +85,18 @@ derived corridor profile (distances, settlements, bridges) replaces the
 nulls; the corridor board gains real geography. Exit: no `null` a mapped
 source could fill; corridor page under the same 50 KB budget.
 
-**Phase 4 — detection experiments.** Blocked on issue #1's answer being YES.
-Offline (non-real-time) replay of the 26 August seismic signal against the
-proposed discriminator, published as notebooks + a results page. **Real-time
-anything stays out of scope** until a partner institution (DHM) owns the
-operational side — a GitHub cron is a workbench, not a siren.
+**Phase 4 — the sparse-network degradation study.** Shaped by
+`docs/RESEARCH.md`: detection of seismogenic mass movements is operationally
+proven on dense networks (SED, ~400 stations), so the experiment here is
+**degradation** — replay the 26 August signal from open FDSN waveform
+archives, synthetically thin the network toward the dozen mixed-quality
+stations Nepal actually has, and measure how detection confidence decays;
+in parallel, label the event for the High Mountain Asia corpus (issue #7).
+Offline, non-real-time, publishable. **Real-time anything stays out of
+scope** until a partner institution (DHM) owns the operational side — a
+GitHub cron is a workbench, not a siren; the detection→warning bridge (CAP
+alerts with per-settlement arrival times) is specified in RESEARCH.md gap
+G3 and built only on that side of the boundary.
 
 ## What this is not
 
