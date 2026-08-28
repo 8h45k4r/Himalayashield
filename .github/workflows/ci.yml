@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Data records are well-formed JSON
+        run: |
+          set -e
+          find data -name '*.json' -print0 | xargs -0 -r -n1 jq empty
+          echo "All JSON parses."
+
+      - name: Data records carry provenance
+        run: |
+          set -e
+          for f in $(find data/events -name '*.json'); do
+            jq -e '.record_status and (.record_status | IN("unverified","verified"))' "$f" >/dev/null \
+              || { echo "$f: missing or invalid record_status"; exit 1; }
+          done
+          echo "Provenance fields present."
+
+      - name: Last-metre pages stay under budget (50 KB, no framework)
+        run: |
+          set -e
+          budget=51200
+          for f in $(find web -name '*.html' 2>/dev/null); do
+            size=$(wc -c < "$f")
+            [ "$size" -le "$budget" ] || { echo "$f is ${size} bytes (> ${budget})"; exit 1; }
+            ! grep -Eiq '<script[^>]+src=' "$f" || { echo "$f loads external script"; exit 1; }
+          done
+          echo "Tier 2 budget holds."
