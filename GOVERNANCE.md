@@ -8,7 +8,9 @@ for it.
 ## Roles
 
 ### Maintainer
-Owns the repository, the plan, and the merge button. Currently: @8h45k4r.
+Owns the repository, the plan, and the merge button. Currently: Bhaskar
+([@8h45k4r](https://github.com/8h45k4r), 8h45k4r@gmail.com). All
+contributions route through the maintainer — see CONTRIBUTING.md.
 
 ### Data custodian — **vacant, blocking**
 Every figure in `data/` needs an owner: one named person who signs the

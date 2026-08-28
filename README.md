@@ -71,6 +71,8 @@ as fact is not.
 - `docs/decisions/` — architecture decision records (ADRs)
 - `web/` — design tokens and, later, the last-metre pages
 - `GOVERNANCE.md` — who decides what, and what a number needs before it is real
+- `CONTRIBUTING.md` — contributions route through the maintainer, Bhaskar
+  (8h45k4r@gmail.com)
 - `PUSH.md` — repository setup state: what is done, what still needs a human in the GitHub UI
 
 ## Design system
