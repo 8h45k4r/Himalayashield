@@ -1,0 +1,13 @@
+# Cloudflare Workers static-assets deployment.
+# The API token lives ONLY in the GitHub Actions secret CLOUDFLARE_API_TOKEN;
+# account IDs are identifiers, not secrets. See docs/RELEASE.md.
+name = "himalayashield"
+account_id = "3fbb398edde83c2c0dc375cbe435175b"
+compatibility_date = "2026-08-01"
+
+routes = [
+  { pattern = "himalayashield.allgetz.com", custom_domain = true }
+]
+
+[assets]
+directory = "./_site"
