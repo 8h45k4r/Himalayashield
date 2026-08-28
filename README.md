@@ -22,7 +22,8 @@ itself. That reinterpretation is the seed of this project: **if the collapse
 wrote a readable signature into the seismic record before the flood reached
 anyone, then minutes of warning existed and nobody could use them.** Whether
 that signal is separable from ordinary seismicity fast enough to act on —
-answered by a named seismologist, not by us — is [issue #1](../../issues/1),
+answered by a named seismologist, not by us — is
+[issue #1](https://github.com/8h45k4r/Himalayashield/issues/1),
 and everything else in this repository is downstream of that answer.
 
 The failure mode we refuse to repeat is South Lhonak (Sikkim, October 2023):
@@ -45,7 +46,7 @@ Every number in `data/` carries provenance. As of today:
   publish guesses for numbers that determine whether a warning is usable.
 
 No figure is promoted from `unverified` until the named data custodian
-([issue #2](../../issues/2)) signs it against an official or primary source.
+([issue #2](https://github.com/8h45k4r/Himalayashield/issues/2)) signs it against an official or primary source.
 Until a custodian exists, nothing gets promoted.
 
 ## Plan (eight weeks)
