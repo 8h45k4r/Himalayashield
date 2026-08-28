@@ -4,7 +4,23 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests, including the failure path (Gate 3)
+        run: python3 -m unittest discover -s tools -v
+      - name: Offline build is loud, not blank (South Lhonak rule)
+        run: |
+          set -e
+          python3 tools/build_site.py --out /tmp/site --force-offline
+          grep -q "FEED OFFLINE" /tmp/site/index.html
+          grep -q "workbench, not a warning system" /tmp/site/index.html
+
   validate:
     runs-on: ubuntu-latest
     steps:

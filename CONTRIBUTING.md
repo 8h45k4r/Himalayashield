@@ -24,8 +24,14 @@ knowing up front.
   `docs/decisions/` — raise it with Bhaskar before building on an assumption.
 - **Design:** ADR 0002 is enforced, not advisory. Last-metre pages are tokens
   only, under 50 KB, working with JavaScript off; CI fails anything over
-  budget. The magenta `offline` state and label+shape rule are not negotiable.
-- **Changes** come as pull requests; Bhaskar reviews and merges.
+  budget. The purple `offline` state (ADR 0004) and label+shape rule are not
+  negotiable, and palette changes must ship validator numbers (docs/DATAVIZ.md).
+- **The five gates (docs/GATES.md) apply to every change, always:** UI/UX,
+  Code, QA/QC, Documentation, VAPT. The PR template walks through them; CI
+  enforces the automatable parts; the rest is reviewed.
+- **Changes** come as pull requests; Bhaskar reviews and merges (CODEOWNERS
+  routes every path to the maintainer). All contributions — now and future —
+  go through Bhaskar (8h45k4r@gmail.com).
 
 ## Licensing note
 

@@ -1,0 +1,31 @@
+# Tag vX.Y.Z → GitHub Release with the exact deployable site as its artifact.
+# docs/RELEASE.md explains versioning; deployment itself is continuous.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions: {}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests must pass on the tagged commit
+        run: python3 -m unittest discover -s tools -v
+      - name: Build the site from the tag
+        run: python3 tools/build_site.py --out _site
+      - name: Package the deployable artifact
+        run: |
+          cd _site && zip -r "../himalayashield-site-${GITHUB_REF_NAME}.zip" .
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "himalayashield-site-${GITHUB_REF_NAME}.zip" \
+            --title "$GITHUB_REF_NAME" --generate-notes
