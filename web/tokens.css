@@ -4,8 +4,10 @@
  * both tiers (see docs/decisions/0002-design-system.md).
  *
  * Rules that are not negotiable:
- *  - `offline` (magenta) sits OUTSIDE the amber→orange→red hazard scale.
- *    "Not watching" must never be readable as "nothing happening".
+ *  - `offline` (purple, ADR 0004 — measured, not eyeballed) sits far outside
+ *    the amber→orange→red hazard scale: ΔE 34 vs danger red, worst-CVD 32.
+ *    "Not watching" must never be readable as "nothing happening" — or as
+ *    danger.
  *  - Colour never carries meaning alone: every state gets a label and a
  *    shape. These tokens style states; they do not define them.
  */
@@ -43,11 +45,12 @@
 
   /* Non-hazard states */
   --state-normal: #198038;      /* green   — watched and quiet         */
-  --state-offline: #d02670;     /* magenta — NOT WATCHING. Outside the
-                                   hazard hue range on purpose.        */
-  --state-offline-bg: #fff0f7;
-  --state-unverified: #8a3ffc;  /* purple  — figure not yet custodian-
-                                   signed; see GOVERNANCE.md           */
+  --state-offline: #8a3ffc;     /* purple — NOT WATCHING. Measured far from
+                                   the hazard hues (ADR 0004).         */
+  --state-offline-bg: #f6f2ff;
+  --state-unverified: #d02670;  /* magenta — figure not yet custodian-
+                                   signed; badge only, never a mark.
+                                   See GOVERNANCE.md + ADR 0004.       */
 
   /* On-colour text */
   --text-on-hazard-danger: #ffffff;
@@ -71,9 +74,9 @@
     --hazard-danger-strong: #da1e28;
 
     --state-normal: #42be65;
-    --state-offline: #ff7eb6;
-    --state-offline-bg: #3a0d24;
-    --state-unverified: #be95ff;
+    --state-offline: #be95ff;
+    --state-offline-bg: #2a2140;
+    --state-unverified: #ff7eb6;
 
     --text-on-hazard-danger: #161616;
     --text-on-state-offline: #161616;
@@ -96,9 +99,9 @@
   --hazard-danger-strong: #da1e28;
 
   --state-normal: #42be65;
-  --state-offline: #ff7eb6;
-  --state-offline-bg: #3a0d24;
-  --state-unverified: #be95ff;
+  --state-offline: #be95ff;
+  --state-offline-bg: #2a2140;
+  --state-unverified: #ff7eb6;
 
   --text-on-hazard-danger: #161616;
   --text-on-state-offline: #161616;

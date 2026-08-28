@@ -1,7 +1,8 @@
 # 0002 — Design system: Carbon, with a hard two-tier scope
 
 Date: 2026-08-28
-Status: accepted
+Status: accepted; the `offline` colour value is superseded by ADR 0004
+(magenta → purple, by measurement — the principle is unchanged)
 
 ## Context
 
