@@ -14,8 +14,7 @@ Owns the repository, the plan, and the merge button. Currently: @8h45k4r.
 Every figure in `data/` needs an owner: one named person who signs the
 promotion of a figure from `unverified` to `verified` against an official or
 primary source, and who is accountable for the correction when it is wrong.
-Until this role is filled (issue #2), no figure is promoted and the repository
-stays private.
+Until this role is filled (issue #2), no figure is promoted.
 
 ### Domain reviewers
 Named specialists (seismology, glaciology, hydrology) who answer specific
@@ -46,12 +45,17 @@ alert semantics — gets an ADR in `docs/decisions/`, numbered, with the
 alternatives that were rejected and why. Decisions live in the repo, not in
 chat history.
 
-## Rules for going public
+## Rules while public
 
-The repository becomes public when, and only when:
-1. The seismic separability question (issue #1) has a named, on-the-record
-   answer — either answer is fine; and
-2. A data custodian is named and the event record has been through one
-   verification pass.
+The repository has been public since 2026-08-28 by the maintainer's decision
+(ADR 0003). The verification gates that originally guarded visibility now
+guard presentation:
 
-One person flips the switch: the maintainer, after both conditions are met.
+1. Nothing here may be presented as fact. Every figure carries its
+   `unverified`/`null` stamp in the data, and the README says in plain words
+   that nothing here can warn anyone. Removing a stamp is a custodian-signed
+   act, never an edit.
+2. The project publishes no conclusions — no retrospective, no findings —
+   before the seismic separability question (issue #1) has a named,
+   on-the-record answer and the event record has been through a custodian
+   verification pass (issue #2, issue #3).

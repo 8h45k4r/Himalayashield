@@ -18,20 +18,23 @@ pushed/filed directly. What remains needs a human in the GitHub UI.
    Settings → Branches → default branch.
 2. **Branch protection** on the default branch: require PRs, require CI to
    pass, no force pushes. Settings → Branches → Add rule.
-3. **Topics**: `glof`, `early-warning`, `himalaya`, `nepal`, `disaster-risk`,
-   `carbon-design-system`. (Add these only when the repo goes public.)
-4. **License** — deliberately not chosen yet; it is a decision, not
-   boilerplate. Apache-2.0 is the likely candidate for the code; data likely
-   wants CC BY 4.0 separately. Decide before going public.
+3. **Topics** — the repo is public, so add them now (Repo page → About → ⚙):
+   `glof`, `early-warning`, `himalaya`, `nepal`, `disaster-risk`,
+   `carbon-design-system`.
+4. **License — now urgent.** A public repository with no license is
+   all-rights-reserved: nobody may legally reuse anything here, which defeats
+   the point of being public. It is still a decision, not boilerplate:
+   Apache-2.0 is the likely candidate for code, CC BY 4.0 separately for
+   data. Decide this week.
 
 ## Going public
 
-Not before week one lands. Conditions are in GOVERNANCE.md: a named answer to
-issue #1 and a named custodian (issue #2). One command when it is time:
-
-```bash
-gh repo edit 8h45k4r/Himalayashield --visibility public
-```
+Done — the maintainer made the repository public on 2026-08-28, ahead of the
+original week-one conditions. The decision and its compensating controls
+(every figure stamped `unverified`/`null`, no conclusions before the
+validated retrospective) are recorded in
+`docs/decisions/0003-public-from-day-two.md`; GOVERNANCE.md now carries
+"Rules while public" instead of visibility conditions.
 
 ## The six day-one issues
 

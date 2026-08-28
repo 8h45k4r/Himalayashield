@@ -58,9 +58,12 @@ Until a custodian exists, nothing gets promoted.
 | 5–6 | Operations console v0 (Carbon React) and last-metre page prototype (tokens only, <50 KB, works with JS off) |
 | 7–8 | Public retrospective of the 26 August event, published only after validation |
 
-This repository is **private until week one lands** — publishing unverified
-numbers about a days-old disaster helps no one. The retrospective in weeks 7–8
-is the planned public artifact.
+This repository is **public from day two** by the maintainer's decision
+([ADR 0003](docs/decisions/0003-public-from-day-two.md)). What that does *not*
+change: every figure stays stamped `unverified` or `null` until a custodian
+signs it, and the project publishes no conclusions before the validated
+retrospective in weeks 7–8. Reading the workbench early is welcome; citing it
+as fact is not.
 
 ## Layout
 
