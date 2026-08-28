@@ -1,0 +1,63 @@
+{
+  "id": "2026-08-26-rasuwa",
+  "name": "Rasuwa (Nepal–Tibet border) outburst flood",
+  "date_utc": "2026-08-26",
+  "record_created": "2026-08-28",
+  "record_status": "unverified",
+  "summary": "Ice–rock avalanche high on the Nepal–Tibet border sent a flash flood of water, ice, rock and mud through valleys in Rasuwa district (Nepal) and adjacent Tibet. The collapse produced a seismic signal initially catalogued by USGS as a magnitude 4.4 earthquake and later reinterpreted as the avalanche itself.",
+  "mechanism": {
+    "value": "ice-rock avalanche; cascading river damming and outburst reported",
+    "status": "unverified",
+    "source": "press synthesis (Geology Page; severe-weather.eu citing USGS; Science Times), 2026-08-27",
+    "retrieved": "2026-08-28"
+  },
+  "seismic_signal": {
+    "initial_catalog_magnitude": {
+      "value": 4.4,
+      "status": "unverified",
+      "source": "press reports citing USGS initial catalog entry",
+      "retrieved": "2026-08-28",
+      "note": "Initially reported as a tectonic earthquake; later attributed to the avalanche mass movement itself. Whether this signature is separable from ordinary seismicity fast enough to warn downstream is issue #1 — the question this project exists to get answered."
+    }
+  },
+  "casualties": {
+    "deaths_reported": {
+      "value": 160,
+      "status": "unverified",
+      "source": "Associated Press via CNN live coverage, late 2026-08-26",
+      "retrieved": "2026-08-28",
+      "note": "Press-derived inside 72 hours of the event, spanning Nepal and China combined. Presumed wrong in detail; re-verify against NDRRMA (Nepal) and official Chinese tallies."
+    },
+    "missing_reported": {
+      "value": null,
+      "status": "unverified",
+      "source": "press reports say 'hundreds' — no figure stable enough to record",
+      "retrieved": "2026-08-28",
+      "note": "Record a number only when an official tally exists."
+    }
+  },
+  "infrastructure": {
+    "value": "roads, bridges, settlements and hydropower installations reported swept away or buried; border access reported extremely difficult",
+    "status": "unverified",
+    "source": "press synthesis, 2026-08-26/27",
+    "retrieved": "2026-08-28"
+  },
+  "corridor": {
+    "river_system": {
+      "value": "Bhotekoshi (Trishuli) corridor, Rasuwa district",
+      "status": "unverified",
+      "source": "press synthesis",
+      "retrieved": "2026-08-28"
+    },
+    "source_to_first_settlement_km": {
+      "value": null,
+      "status": "null",
+      "note": "Filled by the corridor inventory (weeks 3–4) from mapped geometry, not estimated."
+    },
+    "flood_wave_travel_time_min": {
+      "value": null,
+      "status": "null",
+      "note": "Determines whether any warning is usable. Requires hydraulic input; never guessed."
+    }
+  }
+}
