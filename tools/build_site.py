@@ -362,14 +362,144 @@ live (polls public catalogs every minute; needs JavaScript; this page
 doesn't).</p>
 <p>Everything about this project — data provenance rules, decision records,
 the five gates — is public: <a href="{REPO_URL}">{REPO_URL}</a>.
-The 26 August Rasuwa event record it holds is press-derived and
+The <a href="events/2026-08-26-rasuwa/">26 August Rasuwa event record</a>
+is press-derived and
 <span class="chip chip-unverified">✱ UNVERIFIED</span>.</p>
+<p>Machine-readable: <a href="api/meta.json">api/meta.json</a> ·
+<a href="api/events.json">api/events.json</a> ·
+<a href="api/corridors.json">api/corridors.json</a> ·
+<a href="api/lakes.json">api/lakes.json</a> ·
+<a href="feed.xml">Atom feed</a> — every payload carries the same
+disclaimer and provenance rules as this page.</p>
 <p>Contributions route through the maintainer, Bhaskar
 (<a href="mailto:8h45k4r@gmail.com">8h45k4r@gmail.com</a>).</p>
 </footer>
 </main>
 {STALE_SCRIPT}
 </body></html>"""
+
+
+DISCLAIMER = ("This is a workbench, not a warning system. Nothing in this "
+              "data can warn anyone of anything. Figures marked unverified "
+              "are press-derived and presumed wrong in detail; null means "
+              "deliberately not guessed.")
+
+
+def write_api(out, events, corridors, lakes, generated, live):
+    """Static, versionless JSON 'API' — same honesty rules, machine-readable."""
+    api = out / "api"
+    api.mkdir(parents=True, exist_ok=True)
+    gen = generated.strftime("%Y-%m-%dT%H:%M:%SZ")
+    def dump(name, payload):
+        payload = {"generated": gen, "disclaimer": DISCLAIMER, **payload}
+        (api / name).write_text(json.dumps(payload, indent=1), "utf-8")
+    dump("meta.json", {"feed": "live" if live else "offline",
+                       "window_days": WINDOW_DAYS, "min_magnitude": MIN_MAG,
+                       "bbox": BBOX, "source": "USGS FDSN automated catalog",
+                       "events_in_window": len(events)})
+    dump("events.json", {"status": "catalog-automated",
+                         "source": "USGS FDSN automated catalog",
+                         "events": [{"time": e["time"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                     "mag": e["mag"], "depth_km": e["depth_km"],
+                                     "place": e["place"]} for e in events]})
+    dump("corridors.json", {"corridors": corridors})
+    dump("lakes.json", {"lakes": lakes})
+
+
+def write_feed(out, events, generated, live):
+    """Atom feed of catalogued events; valid-but-empty when offline."""
+    gen = generated.strftime("%Y-%m-%dT%H:%M:%SZ")
+    entries = []
+    for e in (sorted(events, key=lambda e: e["time"], reverse=True)[:25] if live else []):
+        t = e["time"].strftime("%Y-%m-%dT%H:%M:%SZ")
+        entries.append(
+            "<entry><id>urn:himalayashield:evt:{}</id>"
+            "<title>M{:.1f} — {}</title><updated>{}</updated>"
+            "<content type=\"text\">USGS automated catalog entry. {}</content>"
+            "</entry>".format(int(e["time"].timestamp()), e["mag"],
+                              html.escape(e["place"]), t,
+                              html.escape(DISCLAIMER)))
+    (out / "feed.xml").write_text(
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<feed xmlns="http://www.w3.org/2005/Atom">'
+        "<id>urn:himalayashield:feed</id>"
+        "<title>Himalayashield — catalogued seismicity, Himalaya arc</title>"
+        f"<subtitle>{html.escape(DISCLAIMER)}"
+        f"{'' if live else ' FEED OFFLINE at build time.'}</subtitle>"
+        f"<updated>{gen}</updated>"
+        f"<link href=\"{REPO_URL}\"/>"
+        f"<author><name>Himalayashield workbench</name></author>"
+        + "".join(entries) + "</feed>", "utf-8")
+
+
+def _provenance_rows(node, path=""):
+    """Flatten an event record into (label, leaf) rows, preserving order."""
+    rows = []
+    for key, val in node.items():
+        label = (path + " · " + key if path else key).replace("_", " ")
+        if isinstance(val, dict):
+            if "status" in val or "value" in val:
+                rows.append((label, val))
+            else:
+                rows.extend(_provenance_rows(val, label))
+    return rows
+
+
+def render_event_page(record, tokens_css, generated):
+    chips = {"unverified": '<span class="chip chip-unverified">✱ UNVERIFIED</span>',
+             "verified": '<span class="chip chip-live">✓ VERIFIED</span>',
+             "null": '<span class="chip chip-offline">∅ NULL — not guessed</span>'}
+    rows = []
+    for label, leaf in _provenance_rows(record):
+        if not isinstance(leaf, dict):
+            continue
+        value = leaf.get("value")
+        status = leaf.get("status", "unverified")
+        if value is None and "value" in leaf:
+            status = "null"
+        rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+                html.escape(label),
+                html.escape("null" if value is None else str(value)),
+                chips.get(status, chips["unverified"]),
+                html.escape(str(leaf.get("source", "")) +
+                            ((" — " + str(leaf["note"])) if leaf.get("note") else ""))))
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>{html.escape(record.get("name", record["id"]))} — event record</title>
+<style>{tokens_css}{PAGE_CSS}
+/* provenance table: the status chip and source must be visible, so wrap */
+td:nth-child(2), td:nth-child(4) {{ white-space: normal; }}
+td .chip {{ white-space: nowrap; }}</style></head>
+<body>
+<main>
+<h1>{html.escape(record.get("name", record["id"]))}</h1>
+<p class="tagline">Event record <code>{html.escape(record["id"])}</code> ·
+record status <span class="chip chip-unverified">✱ {html.escape(record.get("record_status", "unverified").upper())}</span>
+· created {html.escape(record.get("record_created", "?"))}</p>
+<div class="notice">This is a workbench, not a warning system. Every figure
+below carries its provenance; unverified means press-derived and presumed
+wrong in detail; null means deliberately not guessed.</div>
+<p>{html.escape(record.get("summary", ""))}</p>
+<h2>Figures and provenance</h2>
+<div class="scroll"><table>
+<caption>Promotion from unverified to verified is custodian-signed
+(GOVERNANCE.md); the custodian role is currently vacant.</caption>
+<thead><tr><th>Field</th><th>Value</th><th>Status</th><th>Source / note</th></tr></thead>
+<tbody>{"".join(rows)}</tbody></table></div>
+<footer><p>Generated {generated.strftime("%d %b %Y %H:%M UTC")} ·
+<a href="../../">workbench</a> · <a href="{REPO_URL}">{REPO_URL}</a></p></footer>
+</main></body></html>"""
+
+
+NOT_FOUND = """<h1>404 — this path is not watched</h1>
+<p>Nothing exists here, and in this project an absence must be loud:</p>
+<p><span class="chip chip-offline">⊘ OFFLINE — no such page</span></p>
+<p>Try the <a href="/Himalayashield/">workbench</a>, the
+<a href="/Himalayashield/console/">operations console</a>, or the
+<a href="https://github.com/8h45k4r/Himalayashield">repository</a>.</p>"""
 
 
 def build(out_dir, fixture=None, force_offline=False, now=None):
@@ -401,6 +531,20 @@ def build(out_dir, fixture=None, force_offline=False, now=None):
     console_dir.mkdir(parents=True, exist_ok=True)
     (console_dir / "index.html").write_text(
         render_console(corridors, lakes, console_js, tokens_css, now), "utf-8")
+
+    write_api(out, events, corridors, lakes, now, live)
+    write_feed(out, events, now, live)
+    for ev_file in sorted((ROOT / "data" / "events").glob("*.json")):
+        record = json.loads(ev_file.read_text("utf-8"))
+        ev_dir = out / "events" / record["id"]
+        ev_dir.mkdir(parents=True, exist_ok=True)
+        (ev_dir / "index.html").write_text(
+            render_event_page(record, tokens_css, now), "utf-8")
+    (out / "404.html").write_text(
+        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+        "<title>404 — not watched</title><style>" + tokens_css + PAGE_CSS +
+        "</style></head><body><main>" + NOT_FOUND + "</main></body></html>", "utf-8")
 
     size = index.stat().st_size
     if size > BUDGET_BYTES:

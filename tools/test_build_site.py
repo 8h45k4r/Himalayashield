@@ -82,6 +82,52 @@ class BuildTests(unittest.TestCase):
         self.assertIn("Tsho Rolpa", console)                        # boards baked
         self.assertNotRegex(console, r'<script[^>]+src=')           # no external JS
 
+    def test_api_endpoints(self):
+        build_site.main(["--out", str(self.out), "--input", str(self.fixture)])
+        for name in ("meta.json", "events.json", "corridors.json", "lakes.json"):
+            payload = json.loads((self.out / "api" / name).read_text("utf-8"))
+            self.assertIn("workbench, not a warning system",
+                          payload["disclaimer"])
+            self.assertIn("generated", payload)
+        meta = json.loads((self.out / "api" / "meta.json").read_text("utf-8"))
+        self.assertEqual(meta["feed"], "live")
+        self.assertEqual(meta["events_in_window"], 2)
+        ev = json.loads((self.out / "api" / "events.json").read_text("utf-8"))
+        self.assertEqual(ev["events"][-1]["mag"], 4.4)
+
+    def test_api_offline_is_marked(self):
+        build_site.main(["--out", str(self.out), "--force-offline"])
+        meta = json.loads((self.out / "api" / "meta.json").read_text("utf-8"))
+        self.assertEqual(meta["feed"], "offline")
+        feed = (self.out / "feed.xml").read_text("utf-8")
+        self.assertIn("FEED OFFLINE at build time", feed)
+        self.assertNotIn("<entry>", feed)
+
+    def test_atom_feed_is_valid_xml(self):
+        import xml.etree.ElementTree as ET
+        build_site.main(["--out", str(self.out), "--input", str(self.fixture)])
+        root = ET.fromstring((self.out / "feed.xml").read_text("utf-8"))
+        ns = "{http://www.w3.org/2005/Atom}"
+        entries = root.findall(ns + "entry")
+        self.assertEqual(len(entries), 2)
+        self.assertIn("M4.4", entries[0].find(ns + "title").text)
+
+    def test_event_record_page(self):
+        build_site.main(["--out", str(self.out), "--input", str(self.fixture)])
+        page = (self.out / "events" / "2026-08-26-rasuwa" /
+                "index.html").read_text("utf-8")
+        self.assertIn("Rasuwa", page)
+        self.assertIn("✱ UNVERIFIED", page)
+        self.assertIn("∅ NULL — not guessed", page)
+        self.assertIn("workbench, not a warning system", page)
+        self.assertIn("custodian", page)
+
+    def test_404_page(self):
+        build_site.main(["--out", str(self.out), "--force-offline"])
+        page = (self.out / "404.html").read_text("utf-8")
+        self.assertIn("not watched", page)
+        self.assertIn("⊘ OFFLINE", page)
+
     def test_budget_and_headers(self):
         build_site.main(["--out", str(self.out), "--input", str(self.fixture)])
         self.assertLessEqual((self.out / "index.html").stat().st_size,

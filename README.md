@@ -6,7 +6,11 @@ in Himalayan river corridors — starting from the 26 August 2026 Rasuwa
 
 **Live workbench:** https://himalayashield.allgetz.com ·
 https://8h45k4r.github.io/Himalayashield/ — rebuilt every 6 hours from the
-USGS catalog; goes loudly OFFLINE rather than quietly stale.
+USGS catalog; goes loudly OFFLINE rather than quietly stale. The
+**operations console** at `/console/` live-polls the public catalogs
+(ADR 0005); `/api/*.json` and `/feed.xml` serve the same data
+machine-readable, disclaimer included; each event record renders with full
+provenance at `/events/<id>/`.
 
 ## Read this first
 
