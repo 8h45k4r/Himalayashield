@@ -35,6 +35,15 @@ pushed/filed directly. What remains needs a human in the GitHub UI.
    Workers" template, scoped to the `allgetz.com` zone) and add it as the
    `CLOUDFLARE_API_TOKEN` Actions secret; the next Deploy run then publishes
    https://himalayashield.allgetz.com automatically. Steps: docs/RELEASE.md.
+   *Verified 2026-08-29:* the secret is still unset — every Deploy run's
+   `deploy-cloudflare` job skips with "Cloudflare not configured yet".
+   Everything else is ready: tests pass, the build fits the budget, and
+   `npx wrangler@4 deploy --dry-run` validates `wrangler.toml` cleanly
+   (account `3fbb398edde83c2c0dc375cbe435175b`, custom domain
+   `himalayashield.allgetz.com`). No manual DNS or subdomain creation in
+   the Cloudflare dashboard is needed — `custom_domain = true` makes
+   Wrangler create the record on first deploy. The token is the only
+   missing piece.
 5. **License — now urgent.** A public repository with no license is
    all-rights-reserved: nobody may legally reuse anything here, which defeats
    the point of being public. It is still a decision, not boilerplate:
