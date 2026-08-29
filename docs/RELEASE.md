@@ -3,8 +3,11 @@
 Two deployment targets, one build. `tools/build_site.py` produces `_site/`;
 the deploy workflow publishes that identical artifact to:
 
-1. **GitHub Pages** — https://8h45k4r.github.io/Himalayashield/ — zero
-   config, always on.
+1. **GitHub Pages** — https://8h45k4r.github.io/Himalayashield/ — published
+   by force-pushing the built site to the `gh-pages` branch (a disposable
+   artifact branch the workflow owns), which GitHub serves automatically.
+   If it does not auto-enable: Settings → Pages → Source: Deploy from a
+   branch → `gh-pages` / root — one click, once.
 2. **Cloudflare Workers (static assets)** — https://himalayashield.allgetz.com
    — via Wrangler, activates when the repo has a `CLOUDFLARE_API_TOKEN`
    secret (see below). Cloudflare serves the `web/_headers` security headers,

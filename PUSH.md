@@ -17,12 +17,12 @@ pushed/filed directly. What remains needs a human in the GitHub UI.
 
 ## Still manual (GitHub UI — Settings)
 
-0. **Enable GitHub Pages (one click, blocks the Pages deploy):** Settings →
-   Pages → Build and deployment → Source: **GitHub Actions**. The Deploy
-   workflow's `deploy-pages` job fails with "Resource not accessible by
-   integration" until this is set — creating the Pages site the first time
-   needs repo-admin rights the workflow token doesn't have. The next run
-   (or Actions → Deploy → Run workflow) publishes immediately after.
+0. **GitHub Pages:** the Deploy workflow publishes the built site to the
+   `gh-pages` branch, which GitHub normally serves automatically. Check
+   https://8h45k4r.github.io/Himalayashield/ — if it 404s, the one-time
+   click is Settings → Pages → Source: **Deploy from a branch** →
+   `gh-pages` / root. (The previous Pages-API path needed repo-admin
+   rights the workflow token doesn't have.)
 1. **Default branch** — the first branch pushed became the default. Create
    `main` from it (or rename) so feature branches have a base to PR against:
    Settings → Branches → default branch.

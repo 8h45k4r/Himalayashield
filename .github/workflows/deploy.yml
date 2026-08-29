@@ -34,29 +34,38 @@ jobs:
           if grep -Eiq '<(script|link|img)[^>]+(src|href)="https?://' _site/index.html; then
             echo "external resource found in shipped page"; exit 1
           fi
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
       - uses: actions/upload-artifact@v4
         with:
           name: site
           path: _site
 
-  deploy-pages:
+  # Publishing a gh-pages branch avoids the Pages settings API entirely
+  # (creating the Pages site via API needs admin rights the workflow token
+  # lacks); GitHub auto-enables Pages for a gh-pages branch. The branch is
+  # a disposable artifact the workflow owns — force-push is intentional.
+  publish-pages-branch:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      contents: write
     steps:
-      - uses: actions/configure-pages@v5
+      - uses: actions/download-artifact@v4
         with:
-          enablement: true
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          name: site
+          path: _site
+      - name: Publish _site to the gh-pages branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          cd _site
+          touch .nojekyll
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish site $(date -u +%FT%TZ) from ${GITHUB_SHA}"
+          git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
 
   deploy-cloudflare:
     needs: build
