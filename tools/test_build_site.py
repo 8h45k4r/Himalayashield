@@ -53,6 +53,8 @@ class BuildTests(unittest.TestCase):
         self.assertIn("26 Aug collapse", page)          # reference annotation
         self.assertIn("⊘ OFFLINE", page)                # corridor board is honest
         self.assertIn("✱ UNVERIFIED", page)
+        self.assertIn("Tsho Rolpa", page)               # lake watch board renders
+        self.assertIn("Imja", page)
 
     def test_upstream_html_is_escaped(self):
         build_site.main(["--out", str(self.out), "--input", str(self.fixture)])

@@ -58,6 +58,8 @@ p { margin-bottom: var(--space-03); }
 .corridor { border: 1px solid var(--border-subtle); border-left: 6px solid
   var(--state-offline); padding: var(--space-04); margin: var(--space-03) 0;
   background: var(--bg-layer); }
+.corridor.status-normal { border-left-color: var(--state-normal); }
+.corridor.status-unverified { border-left-color: var(--state-unverified); }
 .corridor .note { color: var(--text-secondary); font-size: 0.9rem; }
 .offline-hero { border: 2px solid var(--state-offline);
   background: var(--state-offline-bg); padding: var(--space-05);
@@ -203,14 +205,18 @@ def events_table(events):
         "<tbody>{}</tbody></table></div>".format(len(events), "".join(rows)))
 
 
-def corridor_board(corridors):
+def status_board(items):
+    """Shared renderer for corridor and lake watch boards. Unknown statuses
+    render as OFFLINE — absence must be loud, never green or blank."""
     glyphs = {"normal": ("●", "NORMAL", "chip-live"),
-              "offline": ("⊘", "OFFLINE", "chip-offline")}
+              "offline": ("⊘", "OFFLINE", "chip-offline"),
+              "unverified": ("✱", "UNVERIFIED", "chip-unverified")}
     out = []
-    for c in corridors:
+    for c in items:
         glyph, word, cls = glyphs.get(c["status"], ("⊘", "OFFLINE", "chip-offline"))
+        status_cls = c["status"] if c["status"] in glyphs else "offline"
         out.append(
-            '<div class="corridor"><strong>{}</strong> '
+            '<div class="corridor status-' + status_cls + '"><strong>{}</strong> '
             '<span class="chip {}">{} {}</span>'
             '<p class="note">{} <em>(source: {}, {})</em></p></div>'.format(
                 html.escape(c["name"]), cls, glyph, word,
@@ -219,7 +225,7 @@ def corridor_board(corridors):
     return "".join(out)
 
 
-def render_page(events, corridors, tokens_css, generated, live):
+def render_page(events, corridors, lakes, tokens_css, generated, live):
     gen_str = generated.strftime("%d %b %Y %H:%M UTC")
     feed_chip = ('<span class="chip chip-live">● FEED LIVE</span>' if live else
                  '<span class="chip chip-offline">⊘ FEED OFFLINE</span>')
@@ -260,7 +266,9 @@ Nepal's Department of Hydrology and Meteorology or your local authority.</div>
 {STALE_HOURS} hours old — its build pipeline has stopped. Treat everything
 below as OFFLINE.</div>
 <h2>Corridor watch status</h2>
-{corridor_board(corridors)}
+{status_board(corridors)}
+<h2>Glacial-lake watch</h2>
+{status_board(lakes)}
 <p class="meta">States: <span class="chip chip-live">● NORMAL</span>
 <span class="chip">▲ WATCH</span> <span class="chip">◆ WARNING</span>
 <span class="chip">■ DANGER</span>
@@ -298,7 +306,8 @@ def build(out_dir, fixture=None, force_offline=False, now=None):
             print(f"feed unavailable, building OFFLINE page: {exc}", file=sys.stderr)
     tokens_css = (ROOT / "web" / "tokens.css").read_text("utf-8")
     corridors = json.loads((ROOT / "data" / "corridors.json").read_text("utf-8"))["corridors"]
-    page = render_page(events, corridors, tokens_css, now, live)
+    lakes = json.loads((ROOT / "data" / "lakes.json").read_text("utf-8"))["lakes"]
+    page = render_page(events, corridors, lakes, tokens_css, now, live)
 
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
