@@ -71,6 +71,17 @@ class BuildTests(unittest.TestCase):
         self.assertNotIn("<svg", page)                  # no charts without data
         self.assertIn("workbench, not a warning system", page)
 
+    def test_console_is_built(self):
+        build_site.main(["--out", str(self.out), "--input", str(self.fixture)])
+        console = (self.out / "console" / "index.html").read_text("utf-8")
+        self.assertIn("operations console", console)
+        self.assertIn("workbench, not a warning system", console)
+        self.assertIn("feed-chip", console)
+        self.assertIn("operations console v0 (ADR 0005)", console)  # JS inlined
+        self.assertIn("<noscript>", console)
+        self.assertIn("Tsho Rolpa", console)                        # boards baked
+        self.assertNotRegex(console, r'<script[^>]+src=')           # no external JS
+
     def test_budget_and_headers(self):
         build_site.main(["--out", str(self.out), "--input", str(self.fixture)])
         self.assertLessEqual((self.out / "index.html").stat().st_size,

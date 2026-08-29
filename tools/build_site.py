@@ -83,6 +83,84 @@ body.stale #stale-banner { display: block; }
 svg text { font-family: var(--font-sans); }
 """
 
+CONSOLE_CSS = """
+.panels { display: grid; grid-template-columns: 1fr; gap: var(--space-05); }
+.panel { border: 1px solid var(--border-subtle); background: var(--bg-layer);
+  padding: var(--space-04); }
+.panel h2 { margin: 0 0 var(--space-03); font-size: 1.05rem; }
+.panel .stat { font-family: var(--font-mono); font-size: 1.6rem;
+  font-weight: 600; }
+.panel-head { display: flex; justify-content: space-between; gap: var(--space-03);
+  align-items: baseline; flex-wrap: wrap; }
+#clock { color: var(--text-secondary); font-family: var(--font-mono);
+  font-size: 0.85rem; }
+"""
+
+CONSOLE_NOTE = (
+    "Live view of public catalogs, not a warning surface: the USGS catalog "
+    "itself lags events by minutes to tens of minutes, and the station panel "
+    "shows registered metadata — existence, not live health. Every panel "
+    "carries its data age; a frozen panel goes purple, never quietly stale.")
+
+
+def render_console(corridors, lakes, console_js, tokens_css, generated):
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>{SITE_TITLE} — operations console</title>
+<style>{tokens_css}{PAGE_CSS}{CONSOLE_CSS}</style>
+</head>
+<body>
+<main>
+<div class="panel-head"><h1>{SITE_TITLE} — operations console <small>v0</small></h1>
+<span id="clock"></span></div>
+<p class="tagline">{CONSOLE_NOTE} <a href="../">Workbench (works without
+JavaScript)</a>.</p>
+<div class="notice">This is a workbench, not a warning system. Nothing on
+this page can warn anyone of anything. For live hazard information contact
+Nepal's Department of Hydrology and Meteorology or your local authority.</div>
+<noscript><div class="notice offline-hero">⊘ The console needs JavaScript
+for live polling. Use the <a href="../">workbench page</a> instead — it
+works without it.</div></noscript>
+<div class="panels">
+<section class="panel"><div class="panel-head">
+<h2>Live seismicity — Himalaya arc, last 48 h (M≥2.0)</h2>
+<span id="feed-chip" class="chip chip-offline">⊘ CONNECTING…</span></div>
+<p><span class="stat" id="event-count">–</span> catalogued events ·
+polled every 60 s from the USGS FDSN service</p>
+<div class="scroll" id="chart"></div>
+<div class="scroll"><table>
+<thead><tr><th>Time (UTC)</th><th class=num>Mag</th>
+<th class=num>Depth km</th><th>Region (USGS text)</th></tr></thead>
+<tbody id="events-body"><tr><td colspan="4">Waiting for first poll…</td></tr></tbody>
+</table></div></section>
+<section class="panel"><div class="panel-head">
+<h2>Seismic stations registered in the box</h2>
+<span id="station-chip" class="chip chip-offline">⊘ CONNECTING…</span></div>
+<p><span class="stat" id="station-count">–</span> stations in FDSN metadata
+(lat {BBOX["minlatitude"]}–{BBOX["maxlatitude"]}, lon {BBOX["minlongitude"]}–{BBOX["maxlongitude"]}).
+Sparse-network reality check for
+<a href="{REPO_URL}/issues/1">issue #1</a>.</p>
+<div class="scroll"><table>
+<thead><tr><th>Net</th><th>Station</th><th class=num>Lat, Lon</th><th>Name</th></tr></thead>
+<tbody id="stations-body"><tr><td colspan="4">Waiting…</td></tr></tbody>
+</table></div></section>
+<section class="panel"><h2>Corridor watch</h2>{status_board(corridors)}</section>
+<section class="panel"><h2>Glacial-lake watch</h2>{status_board(lakes)}</section>
+</div>
+<footer>
+<p>Console generated {generated.strftime("%d %b %Y %H:%M UTC")}; the data on
+it is fetched live by your browser from earthquake.usgs.gov and
+service.iris.edu — no other host is contacted. Boards are baked from the
+repository's provenance-stamped data. <a href="{REPO_URL}">{REPO_URL}</a></p>
+</footer>
+</main>
+<script>{console_js}</script>
+</body></html>"""
+
+
 STALE_SCRIPT = (
     '<script>(function(){try{var g=document.body.getAttribute("data-generated");'
     'if(g&&Date.now()-Date.parse(g)>%d*3600*1000){document.body.className+=" stale";}'
@@ -279,6 +357,9 @@ carries its word and shape; colour never means anything alone.</p>
 <footer>
 <p>Generated {gen_str}. Rebuilt every 6 hours; if the timestamp is much
 older, treat this page as OFFLINE (with JavaScript on, it flags itself).</p>
+<p>The <a href="console/">operations console</a> shows the same picture
+live (polls public catalogs every minute; needs JavaScript; this page
+doesn't).</p>
 <p>Everything about this project — data provenance rules, decision records,
 the five gates — is public: <a href="{REPO_URL}">{REPO_URL}</a>.
 The 26 August Rasuwa event record it holds is press-derived and
@@ -314,6 +395,12 @@ def build(out_dir, fixture=None, force_offline=False, now=None):
     index = out / "index.html"
     index.write_text(page, "utf-8")
     shutil.copy(ROOT / "web" / "_headers", out / "_headers")
+
+    console_js = (ROOT / "web" / "console.js").read_text("utf-8")
+    console_dir = out / "console"
+    console_dir.mkdir(parents=True, exist_ok=True)
+    (console_dir / "index.html").write_text(
+        render_console(corridors, lakes, console_js, tokens_css, now), "utf-8")
 
     size = index.stat().st_size
     if size > BUDGET_BYTES:
