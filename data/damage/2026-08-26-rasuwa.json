@@ -1,0 +1,72 @@
+{
+  "event_id": "2026-08-26-rasuwa",
+  "record_created": "2026-08-29",
+  "record_status": "unverified",
+  "note": "Damage register, press/agency-derived inside 72 hours. Per docs/DAMAGE.md: figures are never summed into totals while unverified; source class is recorded but promotion to verified is custodian-signed only (issue #2).",
+  "authoritative_mapping": {
+    "value": "Copernicus EMS Rapid Mapping activation EMSR927 (four areas of interest)",
+    "status": "unverified",
+    "source_class": "earth-observation service",
+    "source": "https://mapping.emergency.copernicus.eu/news/flood-in-nepal-emsr927/",
+    "retrieved": "2026-08-29"
+  },
+  "categories": [
+    {
+      "id": "extent",
+      "metric": "affected reach",
+      "value": "flash floods along ~72 km of the Trishuli; Rasuwa and Nuwakot districts; origin in the Lhende basin with an ice-rock avalanche descending ~1,200 m",
+      "status": "unverified",
+      "source_class": "press synthesis",
+      "source": "Wikipedia (2026 Nepal floods) / ICIMOD press release",
+      "retrieved": "2026-08-29"
+    },
+    {
+      "id": "buildings",
+      "metric": "buildings destroyed / damaged",
+      "value": "more than 240 destroyed, 32 damaged — within CEMS-mapped areas of interest only",
+      "status": "unverified",
+      "source_class": "earth-observation service",
+      "source": "Copernicus EMS EMSR927 analysis",
+      "retrieved": "2026-08-29",
+      "note": "EO-derived within mapped AOIs; NOT an event total."
+    },
+    {
+      "id": "bridges",
+      "metric": "bridges damaged",
+      "value": 41,
+      "status": "unverified",
+      "source_class": "press synthesis citing government",
+      "source": "Wikipedia (2026 Nepal floods) / Nepali press",
+      "retrieved": "2026-08-29"
+    },
+    {
+      "id": "roads",
+      "metric": "road damage",
+      "value": "~42 km damaged; the Betrawati-Rasuwagadhi road reported destroyed; the Syafrubesi-Rasuwagadhi road, under reconstruction after the 2025 flood, damaged again",
+      "status": "unverified",
+      "source_class": "press synthesis citing government",
+      "source": "Wikipedia (2026 Nepal floods) / Kathmandu Post",
+      "retrieved": "2026-08-29",
+      "note": "The 2025-damage-repeated detail matters: this corridor floods repeatedly."
+    },
+    {
+      "id": "hydropower",
+      "metric": "hydropower projects damaged",
+      "value": "14 projects, ~748 MW combined (9 operating totalling 354 MW; 5 under construction totalling 394 MW); ~430 MW of supply affected, roughly one-eighth of national installed capacity",
+      "status": "unverified",
+      "source_class": "official agency via press (Nepal Electricity Authority)",
+      "source": "Kathmandu Post / Wikipedia citing NEA",
+      "retrieved": "2026-08-29"
+    },
+    {
+      "id": "economic",
+      "metric": "preliminary cost estimate, roads and bridges",
+      "value": "Rs 200 billion (preliminary)",
+      "status": "unverified",
+      "source_class": "press synthesis citing government",
+      "source": "Wikipedia (2026 Nepal floods)",
+      "retrieved": "2026-08-29",
+      "note": "Preliminary government figure; expect large revision."
+    }
+  ]
+}

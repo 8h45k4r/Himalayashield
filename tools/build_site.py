@@ -445,7 +445,38 @@ def _provenance_rows(node, path=""):
     return rows
 
 
-def render_event_page(record, tokens_css, generated):
+def damage_section(damage):
+    if damage is None:
+        return ""
+    rows = []
+    for c in damage.get("categories", []):
+        rows.append(
+            "<tr><td>{}</td><td>{}</td>"
+            '<td><span class="chip chip-unverified">✱ UNVERIFIED</span></td>'
+            "<td>{} — {}{}</td></tr>".format(
+                html.escape(c["metric"]), html.escape(str(c["value"])),
+                html.escape(c.get("source_class", "")),
+                html.escape(c.get("source", "")),
+                html.escape((" · " + c["note"]) if c.get("note") else "")))
+    mapping = damage.get("authoritative_mapping", {})
+    map_line = ""
+    if mapping:
+        map_line = ('<p>Authoritative EO mapping: <a href="{}">{}</a>.</p>'.format(
+            html.escape(mapping.get("source", "")),
+            html.escape(str(mapping.get("value", "")))))
+    return f"""
+<h2>Damage register</h2>
+{map_line}
+<div class="scroll"><table>
+<caption>Per docs/DAMAGE.md: this register collects and attributes public
+figures; it generates none of its own, and unverified figures are never
+summed into totals. EO counts cover mapped areas of interest only.</caption>
+<thead><tr><th>Category</th><th>Reported figure</th><th>Status</th>
+<th>Source class — source / note</th></tr></thead>
+<tbody>{"".join(rows)}</tbody></table></div>"""
+
+
+def render_event_page(record, tokens_css, generated, damage=None):
     chips = {"unverified": '<span class="chip chip-unverified">✱ UNVERIFIED</span>',
              "verified": '<span class="chip chip-live">✓ VERIFIED</span>',
              "null": '<span class="chip chip-offline">∅ NULL — not guessed</span>'}
@@ -489,6 +520,7 @@ wrong in detail; null means deliberately not guessed.</div>
 (GOVERNANCE.md); the custodian role is currently vacant.</caption>
 <thead><tr><th>Field</th><th>Value</th><th>Status</th><th>Source / note</th></tr></thead>
 <tbody>{"".join(rows)}</tbody></table></div>
+{damage_section(damage)}
 <footer><p>Generated {generated.strftime("%d %b %Y %H:%M UTC")} ·
 <a href="../../">workbench</a> · <a href="{REPO_URL}">{REPO_URL}</a></p></footer>
 </main></body></html>"""
@@ -534,12 +566,25 @@ def build(out_dir, fixture=None, force_offline=False, now=None):
 
     write_api(out, events, corridors, lakes, now, live)
     write_feed(out, events, now, live)
+    damage_by_event = {}
+    damage_dir = ROOT / "data" / "damage"
+    if damage_dir.is_dir():
+        for f in sorted(damage_dir.glob("*.json")):
+            d = json.loads(f.read_text("utf-8"))
+            damage_by_event[d["event_id"]] = d
+    (out / "api" / "damage.json").write_text(json.dumps(
+        {"generated": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+         "disclaimer": DISCLAIMER,
+         "methodology": "docs/DAMAGE.md — figures are collected and "
+                        "attributed, never generated or summed",
+         "events": damage_by_event}, indent=1), "utf-8")
     for ev_file in sorted((ROOT / "data" / "events").glob("*.json")):
         record = json.loads(ev_file.read_text("utf-8"))
         ev_dir = out / "events" / record["id"]
         ev_dir.mkdir(parents=True, exist_ok=True)
         (ev_dir / "index.html").write_text(
-            render_event_page(record, tokens_css, now), "utf-8")
+            render_event_page(record, tokens_css, now,
+                              damage_by_event.get(record["id"])), "utf-8")
     (out / "404.html").write_text(
         "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"

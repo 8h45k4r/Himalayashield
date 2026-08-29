@@ -122,6 +122,20 @@ class BuildTests(unittest.TestCase):
         self.assertIn("workbench, not a warning system", page)
         self.assertIn("custodian", page)
 
+    def test_damage_register(self):
+        build_site.main(["--out", str(self.out), "--input", str(self.fixture)])
+        page = (self.out / "events" / "2026-08-26-rasuwa" /
+                "index.html").read_text("utf-8")
+        self.assertIn("Damage register", page)
+        self.assertIn("EMSR927", page)
+        self.assertIn("hydropower projects damaged", page)
+        self.assertIn("never", page)  # never-summed caption present
+        api = json.loads((self.out / "api" / "damage.json").read_text("utf-8"))
+        self.assertIn("2026-08-26-rasuwa", api["events"])
+        self.assertIn("workbench, not a warning system", api["disclaimer"])
+        cats = api["events"]["2026-08-26-rasuwa"]["categories"]
+        self.assertTrue(all(c["status"] == "unverified" for c in cats))
+
     def test_404_page(self):
         build_site.main(["--out", str(self.out), "--force-offline"])
         page = (self.out / "404.html").read_text("utf-8")
