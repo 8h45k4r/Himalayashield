@@ -1,0 +1,5 @@
+# Build output (tools/build_site.py) and local tool caches
+_site/
+__pycache__/
+*.pyc
+.wrangler/
