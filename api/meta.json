@@ -1,0 +1,15 @@
+{
+ "generated": "2026-09-05T15:18:22Z",
+ "disclaimer": "This is a workbench, not a warning system. Nothing in this data can warn anyone of anything. Figures marked unverified are press-derived and presumed wrong in detail; null means deliberately not guessed.",
+ "feed": "live",
+ "window_days": 60,
+ "min_magnitude": 2.5,
+ "bbox": {
+  "minlatitude": 26.0,
+  "maxlatitude": 31.5,
+  "minlongitude": 78.0,
+  "maxlongitude": 90.5
+ },
+ "source": "USGS FDSN automated catalog",
+ "events_in_window": 7
+}

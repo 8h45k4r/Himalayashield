@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Rasuwa (Nepal–Tibet border) outburst flood — event record</title>
+<style>/*
+ * Himalayashield design tokens.
+ * Derived from IBM Carbon (v11 palette values); single source of truth for
+ * both tiers (see docs/decisions/0002-design-system.md).
+ *
+ * Rules that are not negotiable:
+ *  - `offline` (purple, ADR 0004 — measured, not eyeballed) sits far outside
+ *    the amber→orange→red hazard scale: ΔE 34 vs danger red, worst-CVD 32.
+ *    "Not watching" must never be readable as "nothing happening" — or as
+ *    danger.
+ *  - Colour never carries meaning alone: every state gets a label and a
+ *    shape. These tokens style states; they do not define them.
+ */
+
+:root {
+  /* Type — IBM Plex, matching the strategy brief. Real fallbacks always. */
+  --font-sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* Spacing — Carbon's 8px-based scale, trimmed */
+  --space-01: 0.125rem;
+  --space-02: 0.25rem;
+  --space-03: 0.5rem;
+  --space-04: 0.75rem;
+  --space-05: 1rem;
+  --space-06: 1.5rem;
+  --space-07: 2rem;
+  --space-08: 2.5rem;
+
+  /* Surfaces & text (light; Carbon White theme values) */
+  --bg: #ffffff;
+  --bg-layer: #f4f4f4;
+  --text-primary: #161616;
+  --text-secondary: #525252;
+  --border-subtle: #e0e0e0;
+  --link: #0f62fe;
+  --focus: #0f62fe;
+
+  /* Hazard scale — amber → orange → red (Carbon yellow/orange/red steps).
+   * Escalation only. Never used for equipment or comms state. */
+  --hazard-watch: #f1c21b;      /* amber  — elevated, being watched   */
+  --hazard-warning: #ff832b;    /* orange — act soon                  */
+  --hazard-danger: #da1e28;     /* red    — act now                   */
+  --hazard-danger-strong: #a2191f;
+
+  /* Non-hazard states */
+  --state-normal: #198038;      /* green   — watched and quiet         */
+  --state-offline: #8a3ffc;     /* purple — NOT WATCHING. Measured far from
+                                   the hazard hues (ADR 0004).         */
+  --state-offline-bg: #f6f2ff;
+  --state-unverified: #d02670;  /* magenta — figure not yet custodian-
+                                   signed; badge only, never a mark.
+                                   See GOVERNANCE.md + ADR 0004.       */
+
+  /* On-colour text */
+  --text-on-hazard-danger: #ffffff;
+  --text-on-state-offline: #ffffff;
+}
+
+/* Dark (Carbon g100-leaning values). System preference… */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161616;
+    --bg-layer: #262626;
+    --text-primary: #f4f4f4;
+    --text-secondary: #c6c6c6;
+    --border-subtle: #393939;
+    --link: #78a9ff;
+    --focus: #ffffff;
+
+    --hazard-watch: #f1c21b;
+    --hazard-warning: #ff832b;
+    --hazard-danger: #fa4d56;
+    --hazard-danger-strong: #da1e28;
+
+    --state-normal: #42be65;
+    --state-offline: #be95ff;
+    --state-offline-bg: #2a2140;
+    --state-unverified: #ff7eb6;
+
+    --text-on-hazard-danger: #161616;
+    --text-on-state-offline: #161616;
+  }
+}
+
+/* …and explicit user choice wins in both directions. */
+:root[data-theme="dark"] {
+  --bg: #161616;
+  --bg-layer: #262626;
+  --text-primary: #f4f4f4;
+  --text-secondary: #c6c6c6;
+  --border-subtle: #393939;
+  --link: #78a9ff;
+  --focus: #ffffff;
+
+  --hazard-watch: #f1c21b;
+  --hazard-warning: #ff832b;
+  --hazard-danger: #fa4d56;
+  --hazard-danger-strong: #da1e28;
+
+  --state-normal: #42be65;
+  --state-offline: #be95ff;
+  --state-offline-bg: #2a2140;
+  --state-unverified: #ff7eb6;
+
+  --text-on-hazard-danger: #161616;
+  --text-on-state-offline: #161616;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--text-primary);
+  font-family: var(--font-sans); line-height: 1.5; font-size: 1rem; }
+main { max-width: 60rem; margin: 0 auto; padding: var(--space-05); }
+a { color: var(--link); }
+h1 { font-size: 1.6rem; margin-bottom: var(--space-02); }
+h2 { font-size: 1.15rem; margin: var(--space-07) 0 var(--space-03); }
+p { margin-bottom: var(--space-03); }
+.tagline { color: var(--text-secondary); }
+.notice { border: 2px solid var(--text-primary); padding: var(--space-04);
+  margin: var(--space-05) 0; font-weight: 600; }
+.chip { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 1rem;
+  font-weight: 700; font-size: 0.85rem; border: 1.5px solid currentColor;
+  white-space: nowrap; }
+.chip-live { color: var(--state-normal); }
+.chip-offline { color: var(--state-offline); background: var(--state-offline-bg); }
+.chip-unverified { color: var(--state-unverified); }
+.corridor { border: 1px solid var(--border-subtle); border-left: 6px solid
+  var(--state-offline); padding: var(--space-04); margin: var(--space-03) 0;
+  background: var(--bg-layer); }
+.corridor.status-normal { border-left-color: var(--state-normal); }
+.corridor.status-unverified { border-left-color: var(--state-unverified); }
+.corridor .note { color: var(--text-secondary); font-size: 0.9rem; }
+.offline-hero { border: 2px solid var(--state-offline);
+  background: var(--state-offline-bg); padding: var(--space-05);
+  margin: var(--space-05) 0; }
+figure { margin: var(--space-04) 0; }
+.scroll { overflow-x: auto; }
+figcaption, .meta { color: var(--text-secondary); font-size: 0.85rem;
+  margin-top: var(--space-02); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+caption { text-align: left; color: var(--text-secondary); font-size: 0.85rem;
+  margin-bottom: var(--space-02); }
+th, td { text-align: left; padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 600; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); }
+footer { margin: var(--space-08) 0 var(--space-05);
+  border-top: 1px solid var(--border-subtle); padding-top: var(--space-04);
+  color: var(--text-secondary); font-size: 0.9rem; }
+#stale-banner { display: none; }
+body.stale #stale-banner { display: block; }
+svg text { font-family: var(--font-sans); }
+
+/* provenance table: the status chip and source must be visible, so wrap */
+td:nth-child(2), td:nth-child(4) { white-space: normal; }
+td .chip { white-space: nowrap; }</style></head>
+<body>
+<main>
+<h1>Rasuwa (Nepal–Tibet border) outburst flood</h1>
+<p class="tagline">Event record <code>2026-08-26-rasuwa</code> ·
+record status <span class="chip chip-unverified">✱ UNVERIFIED</span>
+· created 2026-08-28</p>
+<div class="notice">This is a workbench, not a warning system. Every figure
+below carries its provenance; unverified means press-derived and presumed
+wrong in detail; null means deliberately not guessed.</div>
+<p>Ice–rock avalanche high on the Nepal–Tibet border sent a flash flood of water, ice, rock and mud through valleys in Rasuwa district (Nepal) and adjacent Tibet. The collapse produced a seismic signal initially catalogued by USGS as a magnitude 4.4 earthquake and later reinterpreted as the avalanche itself.</p>
+<h2>Figures and provenance</h2>
+<div class="scroll"><table>
+<caption>Promotion from unverified to verified is custodian-signed
+(GOVERNANCE.md); the custodian role is currently vacant.</caption>
+<thead><tr><th>Field</th><th>Value</th><th>Status</th><th>Source / note</th></tr></thead>
+<tbody><tr><td>mechanism</td><td>ice-rock avalanche; cascading river damming and outburst reported</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press synthesis (Geology Page; severe-weather.eu citing USGS; Science Times), 2026-08-27</td></tr><tr><td>seismic signal · initial catalog magnitude</td><td>4.4</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press reports citing USGS initial catalog entry — Initially reported as a tectonic earthquake; later attributed to the avalanche mass movement itself. Whether this signature is separable from ordinary seismicity fast enough to warn downstream is issue #1 — the question this project exists to get answered.</td></tr><tr><td>casualties · deaths reported</td><td>160</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>Associated Press via CNN live coverage, late 2026-08-26 — Press-derived inside 72 hours of the event, spanning Nepal and China combined. Presumed wrong in detail; re-verify against NDRRMA (Nepal) and official Chinese tallies.</td></tr><tr><td>casualties · missing reported</td><td>null</td><td><span class="chip chip-offline">∅ NULL — not guessed</span></td><td>press reports say &#x27;hundreds&#x27; — no figure stable enough to record — Record a number only when an official tally exists.</td></tr><tr><td>infrastructure</td><td>roads, bridges, settlements and hydropower installations reported swept away or buried; border access reported extremely difficult</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press synthesis, 2026-08-26/27</td></tr><tr><td>corridor · river system</td><td>Bhotekoshi (Trishuli) corridor, Rasuwa district</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press synthesis</td></tr><tr><td>corridor · source to first settlement km</td><td>null</td><td><span class="chip chip-offline">∅ NULL — not guessed</span></td><td> — Filled by the corridor inventory (weeks 3–4) from mapped geometry, not estimated.</td></tr><tr><td>corridor · flood wave travel time min</td><td>null</td><td><span class="chip chip-offline">∅ NULL — not guessed</span></td><td> — Determines whether any warning is usable. Requires hydraulic input; never guessed.</td></tr></tbody></table></div>
+
+<h2>Damage register</h2>
+<p>Authoritative EO mapping: <a href="https://mapping.emergency.copernicus.eu/news/flood-in-nepal-emsr927/">Copernicus EMS Rapid Mapping activation EMSR927 (four areas of interest)</a>.</p>
+<div class="scroll"><table>
+<caption>Per docs/DAMAGE.md: this register collects and attributes public
+figures; it generates none of its own, and unverified figures are never
+summed into totals. EO counts cover mapped areas of interest only.</caption>
+<thead><tr><th>Category</th><th>Reported figure</th><th>Status</th>
+<th>Source class — source / note</th></tr></thead>
+<tbody><tr><td>affected reach</td><td>flash floods along ~72 km of the Trishuli; Rasuwa and Nuwakot districts; origin in the Lhende basin with an ice-rock avalanche descending ~1,200 m</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press synthesis — Wikipedia (2026 Nepal floods) / ICIMOD press release</td></tr><tr><td>buildings destroyed / damaged</td><td>more than 240 destroyed, 32 damaged — within CEMS-mapped areas of interest only</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>earth-observation service — Copernicus EMS EMSR927 analysis · EO-derived within mapped AOIs; NOT an event total.</td></tr><tr><td>bridges damaged</td><td>41</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press synthesis citing government — Wikipedia (2026 Nepal floods) / Nepali press</td></tr><tr><td>road damage</td><td>~42 km damaged; the Betrawati-Rasuwagadhi road reported destroyed; the Syafrubesi-Rasuwagadhi road, under reconstruction after the 2025 flood, damaged again</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press synthesis citing government — Wikipedia (2026 Nepal floods) / Kathmandu Post · The 2025-damage-repeated detail matters: this corridor floods repeatedly.</td></tr><tr><td>hydropower projects damaged</td><td>14 projects, ~748 MW combined (9 operating totalling 354 MW; 5 under construction totalling 394 MW); ~430 MW of supply affected, roughly one-eighth of national installed capacity</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>official agency via press (Nepal Electricity Authority) — Kathmandu Post / Wikipedia citing NEA</td></tr><tr><td>preliminary cost estimate, roads and bridges</td><td>Rs 200 billion (preliminary)</td><td><span class="chip chip-unverified">✱ UNVERIFIED</span></td><td>press synthesis citing government — Wikipedia (2026 Nepal floods) · Preliminary government figure; expect large revision.</td></tr></tbody></table></div>
+<footer><p>Generated 05 Sep 2026 15:18 UTC ·
+<a href="../../">workbench</a> · <a href="https://github.com/8h45k4r/Himalayashield">https://github.com/8h45k4r/Himalayashield</a></p></footer>
+</main></body></html>

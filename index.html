@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Himalayashield — workbench</title>
+<style>/*
+ * Himalayashield design tokens.
+ * Derived from IBM Carbon (v11 palette values); single source of truth for
+ * both tiers (see docs/decisions/0002-design-system.md).
+ *
+ * Rules that are not negotiable:
+ *  - `offline` (purple, ADR 0004 — measured, not eyeballed) sits far outside
+ *    the amber→orange→red hazard scale: ΔE 34 vs danger red, worst-CVD 32.
+ *    "Not watching" must never be readable as "nothing happening" — or as
+ *    danger.
+ *  - Colour never carries meaning alone: every state gets a label and a
+ *    shape. These tokens style states; they do not define them.
+ */
+
+:root {
+  /* Type — IBM Plex, matching the strategy brief. Real fallbacks always. */
+  --font-sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* Spacing — Carbon's 8px-based scale, trimmed */
+  --space-01: 0.125rem;
+  --space-02: 0.25rem;
+  --space-03: 0.5rem;
+  --space-04: 0.75rem;
+  --space-05: 1rem;
+  --space-06: 1.5rem;
+  --space-07: 2rem;
+  --space-08: 2.5rem;
+
+  /* Surfaces & text (light; Carbon White theme values) */
+  --bg: #ffffff;
+  --bg-layer: #f4f4f4;
+  --text-primary: #161616;
+  --text-secondary: #525252;
+  --border-subtle: #e0e0e0;
+  --link: #0f62fe;
+  --focus: #0f62fe;
+
+  /* Hazard scale — amber → orange → red (Carbon yellow/orange/red steps).
+   * Escalation only. Never used for equipment or comms state. */
+  --hazard-watch: #f1c21b;      /* amber  — elevated, being watched   */
+  --hazard-warning: #ff832b;    /* orange — act soon                  */
+  --hazard-danger: #da1e28;     /* red    — act now                   */
+  --hazard-danger-strong: #a2191f;
+
+  /* Non-hazard states */
+  --state-normal: #198038;      /* green   — watched and quiet         */
+  --state-offline: #8a3ffc;     /* purple — NOT WATCHING. Measured far from
+                                   the hazard hues (ADR 0004).         */
+  --state-offline-bg: #f6f2ff;
+  --state-unverified: #d02670;  /* magenta — figure not yet custodian-
+                                   signed; badge only, never a mark.
+                                   See GOVERNANCE.md + ADR 0004.       */
+
+  /* On-colour text */
+  --text-on-hazard-danger: #ffffff;
+  --text-on-state-offline: #ffffff;
+}
+
+/* Dark (Carbon g100-leaning values). System preference… */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161616;
+    --bg-layer: #262626;
+    --text-primary: #f4f4f4;
+    --text-secondary: #c6c6c6;
+    --border-subtle: #393939;
+    --link: #78a9ff;
+    --focus: #ffffff;
+
+    --hazard-watch: #f1c21b;
+    --hazard-warning: #ff832b;
+    --hazard-danger: #fa4d56;
+    --hazard-danger-strong: #da1e28;
+
+    --state-normal: #42be65;
+    --state-offline: #be95ff;
+    --state-offline-bg: #2a2140;
+    --state-unverified: #ff7eb6;
+
+    --text-on-hazard-danger: #161616;
+    --text-on-state-offline: #161616;
+  }
+}
+
+/* …and explicit user choice wins in both directions. */
+:root[data-theme="dark"] {
+  --bg: #161616;
+  --bg-layer: #262626;
+  --text-primary: #f4f4f4;
+  --text-secondary: #c6c6c6;
+  --border-subtle: #393939;
+  --link: #78a9ff;
+  --focus: #ffffff;
+
+  --hazard-watch: #f1c21b;
+  --hazard-warning: #ff832b;
+  --hazard-danger: #fa4d56;
+  --hazard-danger-strong: #da1e28;
+
+  --state-normal: #42be65;
+  --state-offline: #be95ff;
+  --state-offline-bg: #2a2140;
+  --state-unverified: #ff7eb6;
+
+  --text-on-hazard-danger: #161616;
+  --text-on-state-offline: #161616;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--text-primary);
+  font-family: var(--font-sans); line-height: 1.5; font-size: 1rem; }
+main { max-width: 60rem; margin: 0 auto; padding: var(--space-05); }
+a { color: var(--link); }
+h1 { font-size: 1.6rem; margin-bottom: var(--space-02); }
+h2 { font-size: 1.15rem; margin: var(--space-07) 0 var(--space-03); }
+p { margin-bottom: var(--space-03); }
+.tagline { color: var(--text-secondary); }
+.notice { border: 2px solid var(--text-primary); padding: var(--space-04);
+  margin: var(--space-05) 0; font-weight: 600; }
+.chip { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 1rem;
+  font-weight: 700; font-size: 0.85rem; border: 1.5px solid currentColor;
+  white-space: nowrap; }
+.chip-live { color: var(--state-normal); }
+.chip-offline { color: var(--state-offline); background: var(--state-offline-bg); }
+.chip-unverified { color: var(--state-unverified); }
+.corridor { border: 1px solid var(--border-subtle); border-left: 6px solid
+  var(--state-offline); padding: var(--space-04); margin: var(--space-03) 0;
+  background: var(--bg-layer); }
+.corridor.status-normal { border-left-color: var(--state-normal); }
+.corridor.status-unverified { border-left-color: var(--state-unverified); }
+.corridor .note { color: var(--text-secondary); font-size: 0.9rem; }
+.offline-hero { border: 2px solid var(--state-offline);
+  background: var(--state-offline-bg); padding: var(--space-05);
+  margin: var(--space-05) 0; }
+figure { margin: var(--space-04) 0; }
+.scroll { overflow-x: auto; }
+figcaption, .meta { color: var(--text-secondary); font-size: 0.85rem;
+  margin-top: var(--space-02); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+caption { text-align: left; color: var(--text-secondary); font-size: 0.85rem;
+  margin-bottom: var(--space-02); }
+th, td { text-align: left; padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 600; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); }
+footer { margin: var(--space-08) 0 var(--space-05);
+  border-top: 1px solid var(--border-subtle); padding-top: var(--space-04);
+  color: var(--text-secondary); font-size: 0.9rem; }
+#stale-banner { display: none; }
+body.stale #stale-banner { display: block; }
+svg text { font-family: var(--font-sans); }
+</style>
+</head>
+<body data-generated="2026-09-05T15:18:22Z">
+<main>
+<h1>Himalayashield</h1>
+<p class="tagline">An open workbench toward honest glacial-hazard monitoring
+in Himalayan river corridors. <span class="chip chip-live">● FEED LIVE</span></p>
+<div class="notice">This is a workbench, not a warning system. Nothing on
+this page can warn anyone of anything. For live hazard information contact
+Nepal's Department of Hydrology and Meteorology or your local authority.</div>
+<div class="notice offline-hero" id="stale-banner">⊘ This page is more than
+26 hours old — its build pipeline has stopped. Treat everything
+below as OFFLINE.</div>
+<h2>Corridor watch status</h2>
+<div class="corridor status-offline"><strong>Bhotekoshi / Trishuli (Rasuwa)</strong> <span class="chip chip-offline">⊘ OFFLINE</span><p class="note">No monitoring exists. This corridor is not being watched by this project or, to our knowledge, by any real-time system. <em>(source: project assessment, 2026-08-28)</em></p></div>
+<h2>Glacial-lake watch</h2>
+<div class="corridor status-offline"><strong>Tsho Rolpa (Rolwaling, Dolakha)</strong> <span class="chip chip-offline">⊘ OFFLINE</span><p class="note">Grew from 0.23 to 1.53 km² over five decades; level lowered by the government in 2000. The early warning system installed around 2000 is reported damaged and non-operational, and the area lacks a reliable mobile network. A lake called &#x27;monitored&#x27; that is not. <em>(source: PreventionWeb / The New Humanitarian reporting, 2026-08-28)</em></p></div><div class="corridor status-unverified"><strong>Imja Tsho (Solukhumbu)</strong> <span class="chip chip-unverified">✱ UNVERIFIED</span><p class="note">Lowered 3.4 m in 2016 (Government of Nepal / UNDP / GEF); early warning system with automated sirens in six downstream settlements and SMS alerts along ~50 km of the Imja–Dudh Koshi installed. Current operational status NOT verified by this project — verification is the task, not the assumption. <em>(source: EGU 2021 case study (Government of Nepal / UNDP programme reporting), 2026-08-28)</em></p></div>
+<p class="meta">States: <span class="chip chip-live">● NORMAL</span>
+<span class="chip">▲ WATCH</span> <span class="chip">◆ WARNING</span>
+<span class="chip">■ DANGER</span>
+<span class="chip chip-offline">⊘ OFFLINE</span>
+<span class="chip chip-unverified">✱ UNVERIFIED</span> — every state always
+carries its word and shape; colour never means anything alone.</p>
+
+<h2>Seismicity — Himalaya arc, last 60 days</h2>
+<figure><div class="scroll"><svg viewBox="0 0 720 260" role="img" width="720" aria-label="Magnitude of catalogued events over the last 60 days"><line x1="40" y1="220.0" x2="680" y2="220.0" stroke="var(--border-subtle)" stroke-width="1"/><text x="32" y="224.0" text-anchor="end" font-size="11" fill="var(--text-secondary)">M2</text><line x1="40" y1="180.0" x2="680" y2="180.0" stroke="var(--border-subtle)" stroke-width="1"/><text x="32" y="184.0" text-anchor="end" font-size="11" fill="var(--text-secondary)">M3</text><line x1="40" y1="140.0" x2="680" y2="140.0" stroke="var(--border-subtle)" stroke-width="1"/><text x="32" y="144.0" text-anchor="end" font-size="11" fill="var(--text-secondary)">M4</text><line x1="40" y1="100.0" x2="680" y2="100.0" stroke="var(--border-subtle)" stroke-width="1"/><text x="32" y="104.0" text-anchor="end" font-size="11" fill="var(--text-secondary)">M5</text><line x1="40" y1="60.0" x2="680" y2="60.0" stroke="var(--border-subtle)" stroke-width="1"/><text x="32" y="64.0" text-anchor="end" font-size="11" fill="var(--text-secondary)">M6</text><line x1="40.0" y1="220" x2="40.0" y2="225" stroke="var(--text-secondary)" stroke-width="1"/><text x="40.0" y="238" text-anchor="middle" font-size="11" fill="var(--text-secondary)">07 Jul</text><line x1="200.0" y1="220" x2="200.0" y2="225" stroke="var(--text-secondary)" stroke-width="1"/><text x="200.0" y="238" text-anchor="middle" font-size="11" fill="var(--text-secondary)">22 Jul</text><line x1="360.0" y1="220" x2="360.0" y2="225" stroke="var(--text-secondary)" stroke-width="1"/><text x="360.0" y="238" text-anchor="middle" font-size="11" fill="var(--text-secondary)">06 Aug</text><line x1="520.0" y1="220" x2="520.0" y2="225" stroke="var(--text-secondary)" stroke-width="1"/><text x="520.0" y="238" text-anchor="middle" font-size="11" fill="var(--text-secondary)">21 Aug</text><line x1="680.0" y1="220" x2="680.0" y2="225" stroke="var(--text-secondary)" stroke-width="1"/><text x="680.0" y="238" text-anchor="middle" font-size="11" fill="var(--text-secondary)">05 Sep</text><line x1="566.5" y1="30" x2="566.5" y2="220" stroke="var(--text-primary)" stroke-width="1" stroke-dasharray="4 3"/><text x="571.5" y="40" font-size="11" fill="var(--text-primary)">26 Aug collapse</text><circle cx="166.0" cy="120.0" r="6.0" fill="var(--link)" fill-opacity="0.55" stroke="var(--bg)" stroke-width="2"><title>M4.5 — 54 km NE of Tulsīpur, Nepal — 19 Jul 2026 10:45 UTC</title></circle><circle cx="320.0" cy="140.0" r="5.3" fill="var(--link)" fill-opacity="0.55" stroke="var(--bg)" stroke-width="2"><title>M4.0 — 54 km NE of Tulsīpur, Nepal — 02 Aug 2026 21:22 UTC</title></circle><circle cx="394.0" cy="128.0" r="5.7" fill="var(--link)" fill-opacity="0.55" stroke="var(--bg)" stroke-width="2"><title>M4.3 — 13 km ENE of Barkot, India — 09 Aug 2026 19:51 UTC</title></circle><circle cx="490.1" cy="128.0" r="5.7" fill="var(--link)" fill-opacity="0.55" stroke="var(--bg)" stroke-width="2"><title>M4.3 — 143 km NW of Saga, China — 18 Aug 2026 19:59 UTC</title></circle><circle cx="567.8" cy="92.0" r="7.0" fill="var(--link)" fill-opacity="0.55" stroke="var(--bg)" stroke-width="2"><title>M5.2 — 55 km NW of Kodāri̇̄, Nepal — 26 Aug 2026 02:52 UTC</title></circle><circle cx="569.2" cy="132.0" r="5.6" fill="var(--link)" fill-opacity="0.55" stroke="var(--bg)" stroke-width="2"><title>M4.2 — 55 km NW of Kodāri̇̄, Nepal — 26 Aug 2026 06:00 UTC</title></circle><circle cx="655.5" cy="96.0" r="6.8" fill="var(--link)" fill-opacity="0.55" stroke="var(--bg)" stroke-width="2"><title>M5.1 — 115 km NE of Joshīmath, India — 03 Sep 2026 08:16 UTC</title></circle><text x="557.8" y="84.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--text-primary)">M5.2</text></svg></div>
+<figcaption>Catalogued events M≥2.5, lat 26.0–31.5,
+lon 78.0–90.5. Dot size and height both encode
+magnitude. Teleseismic catalog latency is minutes to hours — this view can
+never warn anyone; see the notice above. Exact values in the table.</figcaption>
+</figure>
+<div class="scroll"><table><caption>Latest catalogued events (of 7 in window). Source: USGS FDSN automated catalog — subject to revision by USGS; not reviewed by this project.</caption><thead><tr><th>Time (UTC)</th><th class=num>Mag</th><th class=num>Depth km</th><th>Region (USGS text)</th></tr></thead><tbody><tr><td>03 Sep 2026 08:16</td><td class=num>5.1</td><td class=num>10</td><td>115 km NE of Joshīmath, India</td></tr><tr><td>26 Aug 2026 06:00</td><td class=num>4.2</td><td class=num>0</td><td>55 km NW of Kodāri̇̄, Nepal</td></tr><tr><td>26 Aug 2026 02:52</td><td class=num>5.2</td><td class=num>0</td><td>55 km NW of Kodāri̇̄, Nepal</td></tr><tr><td>18 Aug 2026 19:59</td><td class=num>4.3</td><td class=num>10</td><td>143 km NW of Saga, China</td></tr><tr><td>09 Aug 2026 19:51</td><td class=num>4.3</td><td class=num>10</td><td>13 km ENE of Barkot, India</td></tr><tr><td>02 Aug 2026 21:22</td><td class=num>4.0</td><td class=num>19</td><td>54 km NE of Tulsīpur, Nepal</td></tr><tr><td>19 Jul 2026 10:45</td><td class=num>4.5</td><td class=num>10</td><td>54 km NE of Tulsīpur, Nepal</td></tr></tbody></table></div>
+<footer>
+<p>Generated 05 Sep 2026 15:18 UTC. Rebuilt every 6 hours; if the timestamp is much
+older, treat this page as OFFLINE (with JavaScript on, it flags itself).</p>
+<p>The <a href="console/">operations console</a> shows the same picture
+live (polls public catalogs every minute; needs JavaScript; this page
+doesn't).</p>
+<p>Everything about this project — data provenance rules, decision records,
+the five gates — is public: <a href="https://github.com/8h45k4r/Himalayashield">https://github.com/8h45k4r/Himalayashield</a>.
+The <a href="events/2026-08-26-rasuwa/">26 August Rasuwa event record</a>
+is press-derived and
+<span class="chip chip-unverified">✱ UNVERIFIED</span>.</p>
+<p>Machine-readable: <a href="api/meta.json">api/meta.json</a> ·
+<a href="api/events.json">api/events.json</a> ·
+<a href="api/corridors.json">api/corridors.json</a> ·
+<a href="api/lakes.json">api/lakes.json</a> ·
+<a href="feed.xml">Atom feed</a> — every payload carries the same
+disclaimer and provenance rules as this page.</p>
+<p>Contributions route through the maintainer, Bhaskar
+(<a href="mailto:8h45k4r@gmail.com">8h45k4r@gmail.com</a>).</p>
+</footer>
+</main>
+<script>(function(){try{var g=document.body.getAttribute("data-generated");if(g&&Date.now()-Date.parse(g)>26*3600*1000){document.body.className+=" stale";}}catch(e){}})();</script>
+</body></html>

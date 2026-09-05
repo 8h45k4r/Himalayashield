@@ -1,0 +1,22 @@
+{
+ "generated": "2026-09-05T15:18:22Z",
+ "disclaimer": "This is a workbench, not a warning system. Nothing in this data can warn anyone of anything. Figures marked unverified are press-derived and presumed wrong in detail; null means deliberately not guessed.",
+ "lakes": [
+  {
+   "id": "tsho-rolpa",
+   "name": "Tsho Rolpa (Rolwaling, Dolakha)",
+   "status": "offline",
+   "note": "Grew from 0.23 to 1.53 km\u00b2 over five decades; level lowered by the government in 2000. The early warning system installed around 2000 is reported damaged and non-operational, and the area lacks a reliable mobile network. A lake called 'monitored' that is not.",
+   "source": "PreventionWeb / The New Humanitarian reporting",
+   "retrieved": "2026-08-28"
+  },
+  {
+   "id": "imja",
+   "name": "Imja Tsho (Solukhumbu)",
+   "status": "unverified",
+   "note": "Lowered 3.4 m in 2016 (Government of Nepal / UNDP / GEF); early warning system with automated sirens in six downstream settlements and SMS alerts along ~50 km of the Imja\u2013Dudh Koshi installed. Current operational status NOT verified by this project \u2014 verification is the task, not the assumption.",
+   "source": "EGU 2021 case study (Government of Nepal / UNDP programme reporting)",
+   "retrieved": "2026-08-28"
+  }
+ ]
+}

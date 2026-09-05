@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Himalayashield — operations console</title>
+<style>/*
+ * Himalayashield design tokens.
+ * Derived from IBM Carbon (v11 palette values); single source of truth for
+ * both tiers (see docs/decisions/0002-design-system.md).
+ *
+ * Rules that are not negotiable:
+ *  - `offline` (purple, ADR 0004 — measured, not eyeballed) sits far outside
+ *    the amber→orange→red hazard scale: ΔE 34 vs danger red, worst-CVD 32.
+ *    "Not watching" must never be readable as "nothing happening" — or as
+ *    danger.
+ *  - Colour never carries meaning alone: every state gets a label and a
+ *    shape. These tokens style states; they do not define them.
+ */
+
+:root {
+  /* Type — IBM Plex, matching the strategy brief. Real fallbacks always. */
+  --font-sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* Spacing — Carbon's 8px-based scale, trimmed */
+  --space-01: 0.125rem;
+  --space-02: 0.25rem;
+  --space-03: 0.5rem;
+  --space-04: 0.75rem;
+  --space-05: 1rem;
+  --space-06: 1.5rem;
+  --space-07: 2rem;
+  --space-08: 2.5rem;
+
+  /* Surfaces & text (light; Carbon White theme values) */
+  --bg: #ffffff;
+  --bg-layer: #f4f4f4;
+  --text-primary: #161616;
+  --text-secondary: #525252;
+  --border-subtle: #e0e0e0;
+  --link: #0f62fe;
+  --focus: #0f62fe;
+
+  /* Hazard scale — amber → orange → red (Carbon yellow/orange/red steps).
+   * Escalation only. Never used for equipment or comms state. */
+  --hazard-watch: #f1c21b;      /* amber  — elevated, being watched   */
+  --hazard-warning: #ff832b;    /* orange — act soon                  */
+  --hazard-danger: #da1e28;     /* red    — act now                   */
+  --hazard-danger-strong: #a2191f;
+
+  /* Non-hazard states */
+  --state-normal: #198038;      /* green   — watched and quiet         */
+  --state-offline: #8a3ffc;     /* purple — NOT WATCHING. Measured far from
+                                   the hazard hues (ADR 0004).         */
+  --state-offline-bg: #f6f2ff;
+  --state-unverified: #d02670;  /* magenta — figure not yet custodian-
+                                   signed; badge only, never a mark.
+                                   See GOVERNANCE.md + ADR 0004.       */
+
+  /* On-colour text */
+  --text-on-hazard-danger: #ffffff;
+  --text-on-state-offline: #ffffff;
+}
+
+/* Dark (Carbon g100-leaning values). System preference… */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161616;
+    --bg-layer: #262626;
+    --text-primary: #f4f4f4;
+    --text-secondary: #c6c6c6;
+    --border-subtle: #393939;
+    --link: #78a9ff;
+    --focus: #ffffff;
+
+    --hazard-watch: #f1c21b;
+    --hazard-warning: #ff832b;
+    --hazard-danger: #fa4d56;
+    --hazard-danger-strong: #da1e28;
+
+    --state-normal: #42be65;
+    --state-offline: #be95ff;
+    --state-offline-bg: #2a2140;
+    --state-unverified: #ff7eb6;
+
+    --text-on-hazard-danger: #161616;
+    --text-on-state-offline: #161616;
+  }
+}
+
+/* …and explicit user choice wins in both directions. */
+:root[data-theme="dark"] {
+  --bg: #161616;
+  --bg-layer: #262626;
+  --text-primary: #f4f4f4;
+  --text-secondary: #c6c6c6;
+  --border-subtle: #393939;
+  --link: #78a9ff;
+  --focus: #ffffff;
+
+  --hazard-watch: #f1c21b;
+  --hazard-warning: #ff832b;
+  --hazard-danger: #fa4d56;
+  --hazard-danger-strong: #da1e28;
+
+  --state-normal: #42be65;
+  --state-offline: #be95ff;
+  --state-offline-bg: #2a2140;
+  --state-unverified: #ff7eb6;
+
+  --text-on-hazard-danger: #161616;
+  --text-on-state-offline: #161616;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--text-primary);
+  font-family: var(--font-sans); line-height: 1.5; font-size: 1rem; }
+main { max-width: 60rem; margin: 0 auto; padding: var(--space-05); }
+a { color: var(--link); }
+h1 { font-size: 1.6rem; margin-bottom: var(--space-02); }
+h2 { font-size: 1.15rem; margin: var(--space-07) 0 var(--space-03); }
+p { margin-bottom: var(--space-03); }
+.tagline { color: var(--text-secondary); }
+.notice { border: 2px solid var(--text-primary); padding: var(--space-04);
+  margin: var(--space-05) 0; font-weight: 600; }
+.chip { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 1rem;
+  font-weight: 700; font-size: 0.85rem; border: 1.5px solid currentColor;
+  white-space: nowrap; }
+.chip-live { color: var(--state-normal); }
+.chip-offline { color: var(--state-offline); background: var(--state-offline-bg); }
+.chip-unverified { color: var(--state-unverified); }
+.corridor { border: 1px solid var(--border-subtle); border-left: 6px solid
+  var(--state-offline); padding: var(--space-04); margin: var(--space-03) 0;
+  background: var(--bg-layer); }
+.corridor.status-normal { border-left-color: var(--state-normal); }
+.corridor.status-unverified { border-left-color: var(--state-unverified); }
+.corridor .note { color: var(--text-secondary); font-size: 0.9rem; }
+.offline-hero { border: 2px solid var(--state-offline);
+  background: var(--state-offline-bg); padding: var(--space-05);
+  margin: var(--space-05) 0; }
+figure { margin: var(--space-04) 0; }
+.scroll { overflow-x: auto; }
+figcaption, .meta { color: var(--text-secondary); font-size: 0.85rem;
+  margin-top: var(--space-02); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+caption { text-align: left; color: var(--text-secondary); font-size: 0.85rem;
+  margin-bottom: var(--space-02); }
+th, td { text-align: left; padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 600; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); }
+footer { margin: var(--space-08) 0 var(--space-05);
+  border-top: 1px solid var(--border-subtle); padding-top: var(--space-04);
+  color: var(--text-secondary); font-size: 0.9rem; }
+#stale-banner { display: none; }
+body.stale #stale-banner { display: block; }
+svg text { font-family: var(--font-sans); }
+
+.panels { display: grid; grid-template-columns: 1fr; gap: var(--space-05); }
+.panel { border: 1px solid var(--border-subtle); background: var(--bg-layer);
+  padding: var(--space-04); }
+.panel h2 { margin: 0 0 var(--space-03); font-size: 1.05rem; }
+.panel .stat { font-family: var(--font-mono); font-size: 1.6rem;
+  font-weight: 600; }
+.panel-head { display: flex; justify-content: space-between; gap: var(--space-03);
+  align-items: baseline; flex-wrap: wrap; }
+#clock { color: var(--text-secondary); font-family: var(--font-mono);
+  font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+<div class="panel-head"><h1>Himalayashield — operations console <small>v0</small></h1>
+<span id="clock"></span></div>
+<p class="tagline">Live view of public catalogs, not a warning surface: the USGS catalog itself lags events by minutes to tens of minutes, and the station panel shows registered metadata — existence, not live health. Every panel carries its data age; a frozen panel goes purple, never quietly stale. <a href="../">Workbench (works without
+JavaScript)</a>.</p>
+<div class="notice">This is a workbench, not a warning system. Nothing on
+this page can warn anyone of anything. For live hazard information contact
+Nepal's Department of Hydrology and Meteorology or your local authority.</div>
+<noscript><div class="notice offline-hero">⊘ The console needs JavaScript
+for live polling. Use the <a href="../">workbench page</a> instead — it
+works without it.</div></noscript>
+<div class="panels">
+<section class="panel"><div class="panel-head">
+<h2>Live seismicity — Himalaya arc, last 48 h (M≥2.0)</h2>
+<span id="feed-chip" class="chip chip-offline">⊘ CONNECTING…</span></div>
+<p><span class="stat" id="event-count">–</span> catalogued events ·
+polled every 60 s from the USGS FDSN service</p>
+<div class="scroll" id="chart"></div>
+<div class="scroll"><table>
+<thead><tr><th>Time (UTC)</th><th class=num>Mag</th>
+<th class=num>Depth km</th><th>Region (USGS text)</th></tr></thead>
+<tbody id="events-body"><tr><td colspan="4">Waiting for first poll…</td></tr></tbody>
+</table></div></section>
+<section class="panel"><div class="panel-head">
+<h2>Seismic stations registered in the box</h2>
+<span id="station-chip" class="chip chip-offline">⊘ CONNECTING…</span></div>
+<p><span class="stat" id="station-count">–</span> stations in FDSN metadata
+(lat 26.0–31.5, lon 78.0–90.5).
+Sparse-network reality check for
+<a href="https://github.com/8h45k4r/Himalayashield/issues/1">issue #1</a>.</p>
+<div class="scroll"><table>
+<thead><tr><th>Net</th><th>Station</th><th class=num>Lat, Lon</th><th>Name</th></tr></thead>
+<tbody id="stations-body"><tr><td colspan="4">Waiting…</td></tr></tbody>
+</table></div></section>
+<section class="panel"><h2>Corridor watch</h2><div class="corridor status-offline"><strong>Bhotekoshi / Trishuli (Rasuwa)</strong> <span class="chip chip-offline">⊘ OFFLINE</span><p class="note">No monitoring exists. This corridor is not being watched by this project or, to our knowledge, by any real-time system. <em>(source: project assessment, 2026-08-28)</em></p></div></section>
+<section class="panel"><h2>Glacial-lake watch</h2><div class="corridor status-offline"><strong>Tsho Rolpa (Rolwaling, Dolakha)</strong> <span class="chip chip-offline">⊘ OFFLINE</span><p class="note">Grew from 0.23 to 1.53 km² over five decades; level lowered by the government in 2000. The early warning system installed around 2000 is reported damaged and non-operational, and the area lacks a reliable mobile network. A lake called &#x27;monitored&#x27; that is not. <em>(source: PreventionWeb / The New Humanitarian reporting, 2026-08-28)</em></p></div><div class="corridor status-unverified"><strong>Imja Tsho (Solukhumbu)</strong> <span class="chip chip-unverified">✱ UNVERIFIED</span><p class="note">Lowered 3.4 m in 2016 (Government of Nepal / UNDP / GEF); early warning system with automated sirens in six downstream settlements and SMS alerts along ~50 km of the Imja–Dudh Koshi installed. Current operational status NOT verified by this project — verification is the task, not the assumption. <em>(source: EGU 2021 case study (Government of Nepal / UNDP programme reporting), 2026-08-28)</em></p></div></section>
+</div>
+<footer>
+<p>Console generated 05 Sep 2026 15:18 UTC; the data on
+it is fetched live by your browser from earthquake.usgs.gov and
+service.iris.edu — no other host is contacted. Boards are baked from the
+repository's provenance-stamped data. <a href="https://github.com/8h45k4r/Himalayashield">https://github.com/8h45k4r/Himalayashield</a></p>
+</footer>
+</main>
+<script>/* Himalayashield operations console v0 (ADR 0005).
+ * Dependency-free live polling of public FDSN services. Hard rule: a frozen
+ * panel must never look live — every panel carries a data-age stamp and
+ * flips to the purple OFFLINE state on failure or staleness.
+ */
+"use strict";
+(function () {
+  var BBOX = { minlatitude: 26.0, maxlatitude: 31.5,
+               minlongitude: 78.0, maxlongitude: 90.5 };
+  var USGS = "https://earthquake.usgs.gov/fdsnws/event/1/query";
+  var IRIS = "https://service.iris.edu/fdsnws/station/1/query";
+  var POLL_MS = 60000, STALE_MS = 5 * 60000, WINDOW_H = 48, MIN_MAG = 2.0;
+
+  var lastOk = null, events = [];
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function utc(d) {
+    return pad(d.getUTCDate()) + " " +
+      ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()] +
+      " " + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + " UTC";
+  }
+  function ageText(ms) {
+    if (ms < 90000) return Math.round(ms / 1000) + " s";
+    if (ms < 5400000) return Math.round(ms / 60000) + " min";
+    return (ms / 3600000).toFixed(1) + " h";
+  }
+
+  function setFeedState(state, ageMs) {
+    var chip = $("feed-chip");
+    if (state === "live") {
+      chip.className = "chip chip-live";
+      chip.textContent = "● LIVE · data age " + ageText(ageMs);
+    } else if (state === "stale") {
+      chip.className = "chip chip-offline";
+      chip.textContent = "⊘ STALE · last data " + ageText(ageMs) + " ago";
+    } else {
+      chip.className = "chip chip-offline";
+      chip.textContent = "⊘ FEED OFFLINE · fetch failed";
+    }
+  }
+
+  function drawChart() {
+    var w = 720, h = 220, pad_ = 40;
+    var now = Date.now(), start = now - WINDOW_H * 3600000;
+    var lo = MIN_MAG, hi = 6.0;
+    for (var i = 0; i < events.length; i++) {
+      if (events[i].mag + 0.5 > hi) hi = events[i].mag + 0.5;
+    }
+    function X(t) { return pad_ + (t - start) / (now - start) * (w - 2 * pad_); }
+    function Y(m) { return h - pad_ - (m - lo) / (hi - lo) * (h - 2 * pad_); }
+    var s = [];
+    var m = Math.ceil(lo);
+    for (; m <= hi; m++) {
+      var y = Y(m).toFixed(1);
+      s.push('<line x1="' + pad_ + '" y1="' + y + '" x2="' + (w - pad_) +
+        '" y2="' + y + '" stroke="var(--border-subtle)" stroke-width="1"/>');
+      s.push('<text x="' + (pad_ - 8) + '" y="' + (+y + 4) +
+        '" text-anchor="end" font-size="11" fill="var(--text-secondary)">M' + m + "</text>");
+    }
+    for (var hrs = 0; hrs <= WINDOW_H; hrs += 12) {
+      var t = start + hrs * 3600000, x = X(t).toFixed(1);
+      var d = new Date(t);
+      s.push('<line x1="' + x + '" y1="' + (h - pad_) + '" x2="' + x + '" y2="' +
+        (h - pad_ + 5) + '" stroke="var(--text-secondary)" stroke-width="1"/>');
+      s.push('<text x="' + x + '" y="' + (h - pad_ + 18) +
+        '" text-anchor="middle" font-size="11" fill="var(--text-secondary)">' +
+        pad(d.getUTCDate()) + "/" + pad(d.getUTCMonth() + 1) + " " +
+        pad(d.getUTCHours()) + "h</text>");
+    }
+    for (i = 0; i < events.length; i++) {
+      var e = events[i];
+      var r = (2.5 + (e.mag - lo) * 1.4).toFixed(1);
+      s.push('<circle cx="' + X(e.time).toFixed(1) + '" cy="' + Y(e.mag).toFixed(1) +
+        '" r="' + r + '" fill="var(--link)" fill-opacity="0.55" ' +
+        'stroke="var(--bg)" stroke-width="2"><title>' +
+        esc("M" + e.mag.toFixed(1) + " — " + e.place + " — " + utc(new Date(e.time))) +
+        "</title></circle>");
+    }
+    $("chart").innerHTML =
+      '<svg viewBox="0 0 ' + w + " " + h + '" width="' + w + '" role="img" ' +
+      'aria-label="Catalogued events, last ' + WINDOW_H + ' hours">' + s.join("") + "</svg>";
+  }
+
+  function renderTable() {
+    var rows = [];
+    for (var i = events.length - 1; i >= 0 && rows.length < 15; i--) {
+      var e = events[i];
+      rows.push("<tr><td>" + utc(new Date(e.time)) + '</td><td class="num">' +
+        e.mag.toFixed(1) + '</td><td class="num">' +
+        (e.depth == null ? "—" : e.depth.toFixed(0)) + "</td><td>" +
+        esc(e.place) + "</td></tr>");
+    }
+    $("events-body").innerHTML = rows.join("") ||
+      '<tr><td colspan="4">No catalogued events M≥' + MIN_MAG +
+      " in the last " + WINDOW_H + " hours.</td></tr>";
+    $("event-count").textContent = String(events.length);
+  }
+
+  function poll() {
+    var startIso = new Date(Date.now() - WINDOW_H * 3600000)
+      .toISOString().slice(0, 19);
+    var url = USGS + "?format=geojson&orderby=time-asc&minmagnitude=" + MIN_MAG +
+      "&starttime=" + startIso +
+      "&minlatitude=" + BBOX.minlatitude + "&maxlatitude=" + BBOX.maxlatitude +
+      "&minlongitude=" + BBOX.minlongitude + "&maxlongitude=" + BBOX.maxlongitude;
+    fetch(url, { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (gj) {
+      events = [];
+      var feats = gj.features || [];
+      for (var i = 0; i < feats.length; i++) {
+        var p = feats[i].properties || {};
+        var g = (feats[i].geometry || {}).coordinates || [];
+        if (p.mag == null || p.time == null) continue;
+        events.push({ time: +p.time, mag: +p.mag,
+          depth: g.length > 2 && g[2] != null ? +g[2] : null,
+          place: String(p.place || "unknown location") });
+      }
+      lastOk = Date.now();
+      drawChart();
+      renderTable();
+    }).catch(function () {
+      if (lastOk === null) setFeedState("offline");
+    });
+  }
+
+  function loadStations() {
+    var url = IRIS + "?format=text&level=station&endafter=" +
+      new Date().toISOString().slice(0, 10) +
+      "&minlatitude=" + BBOX.minlatitude + "&maxlatitude=" + BBOX.maxlatitude +
+      "&minlongitude=" + BBOX.minlongitude + "&maxlongitude=" + BBOX.maxlongitude;
+    fetch(url).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(function (txt) {
+      var lines = txt.split("\n"), rows = [];
+      for (var i = 0; i < lines.length; i++) {
+        if (!lines[i] || lines[i].charAt(0) === "#") continue;
+        var f = lines[i].split("|");
+        if (f.length < 4) continue;
+        rows.push("<tr><td>" + esc(f[0]) + "</td><td>" + esc(f[1]) +
+          '</td><td class="num">' + esc((+f[2]).toFixed(2)) + ", " +
+          esc((+f[3]).toFixed(2)) + "</td><td>" + esc(f[5] || "") + "</td></tr>");
+      }
+      $("station-count").textContent = String(rows.length);
+      $("stations-body").innerHTML = rows.join("") ||
+        '<tr><td colspan="4">None registered in the box.</td></tr>';
+      var chip = $("station-chip");
+      chip.className = "chip chip-unverified";
+      chip.textContent = "✱ METADATA ONLY · existence, not live health";
+    }).catch(function () {
+      var chip = $("station-chip");
+      chip.className = "chip chip-offline";
+      chip.textContent = "⊘ OFFLINE · station service unreachable";
+    });
+  }
+
+  function tick() {
+    if (lastOk !== null) {
+      var age = Date.now() - lastOk;
+      setFeedState(age > STALE_MS ? "stale" : "live", age);
+    }
+    $("clock").textContent = utc(new Date());
+  }
+
+  poll();
+  loadStations();
+  setInterval(poll, POLL_MS);
+  setInterval(tick, 1000);
+  tick();
+})();
+</script>
+</body></html>

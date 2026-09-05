@@ -1,0 +1,14 @@
+{
+ "generated": "2026-09-05T15:18:22Z",
+ "disclaimer": "This is a workbench, not a warning system. Nothing in this data can warn anyone of anything. Figures marked unverified are press-derived and presumed wrong in detail; null means deliberately not guessed.",
+ "corridors": [
+  {
+   "id": "bhotekoshi-trishuli",
+   "name": "Bhotekoshi / Trishuli (Rasuwa)",
+   "status": "offline",
+   "note": "No monitoring exists. This corridor is not being watched by this project or, to our knowledge, by any real-time system.",
+   "source": "project assessment",
+   "retrieved": "2026-08-28"
+  }
+ ]
+}
