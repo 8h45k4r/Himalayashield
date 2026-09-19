@@ -1,0 +1,158 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>404 — not watched</title><style>/*
+ * Himalayashield design tokens.
+ * Derived from IBM Carbon (v11 palette values); single source of truth for
+ * both tiers (see docs/decisions/0002-design-system.md).
+ *
+ * Rules that are not negotiable:
+ *  - `offline` (purple, ADR 0004 — measured, not eyeballed) sits far outside
+ *    the amber→orange→red hazard scale: ΔE 34 vs danger red, worst-CVD 32.
+ *    "Not watching" must never be readable as "nothing happening" — or as
+ *    danger.
+ *  - Colour never carries meaning alone: every state gets a label and a
+ *    shape. These tokens style states; they do not define them.
+ */
+
+:root {
+  /* Type — IBM Plex, matching the strategy brief. Real fallbacks always. */
+  --font-sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* Spacing — Carbon's 8px-based scale, trimmed */
+  --space-01: 0.125rem;
+  --space-02: 0.25rem;
+  --space-03: 0.5rem;
+  --space-04: 0.75rem;
+  --space-05: 1rem;
+  --space-06: 1.5rem;
+  --space-07: 2rem;
+  --space-08: 2.5rem;
+
+  /* Surfaces & text (light; Carbon White theme values) */
+  --bg: #ffffff;
+  --bg-layer: #f4f4f4;
+  --text-primary: #161616;
+  --text-secondary: #525252;
+  --border-subtle: #e0e0e0;
+  --link: #0f62fe;
+  --focus: #0f62fe;
+
+  /* Hazard scale — amber → orange → red (Carbon yellow/orange/red steps).
+   * Escalation only. Never used for equipment or comms state. */
+  --hazard-watch: #f1c21b;      /* amber  — elevated, being watched   */
+  --hazard-warning: #ff832b;    /* orange — act soon                  */
+  --hazard-danger: #da1e28;     /* red    — act now                   */
+  --hazard-danger-strong: #a2191f;
+
+  /* Non-hazard states */
+  --state-normal: #198038;      /* green   — watched and quiet         */
+  --state-offline: #8a3ffc;     /* purple — NOT WATCHING. Measured far from
+                                   the hazard hues (ADR 0004).         */
+  --state-offline-bg: #f6f2ff;
+  --state-unverified: #d02670;  /* magenta — figure not yet custodian-
+                                   signed; badge only, never a mark.
+                                   See GOVERNANCE.md + ADR 0004.       */
+
+  /* On-colour text */
+  --text-on-hazard-danger: #ffffff;
+  --text-on-state-offline: #ffffff;
+}
+
+/* Dark (Carbon g100-leaning values). System preference… */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161616;
+    --bg-layer: #262626;
+    --text-primary: #f4f4f4;
+    --text-secondary: #c6c6c6;
+    --border-subtle: #393939;
+    --link: #78a9ff;
+    --focus: #ffffff;
+
+    --hazard-watch: #f1c21b;
+    --hazard-warning: #ff832b;
+    --hazard-danger: #fa4d56;
+    --hazard-danger-strong: #da1e28;
+
+    --state-normal: #42be65;
+    --state-offline: #be95ff;
+    --state-offline-bg: #2a2140;
+    --state-unverified: #ff7eb6;
+
+    --text-on-hazard-danger: #161616;
+    --text-on-state-offline: #161616;
+  }
+}
+
+/* …and explicit user choice wins in both directions. */
+:root[data-theme="dark"] {
+  --bg: #161616;
+  --bg-layer: #262626;
+  --text-primary: #f4f4f4;
+  --text-secondary: #c6c6c6;
+  --border-subtle: #393939;
+  --link: #78a9ff;
+  --focus: #ffffff;
+
+  --hazard-watch: #f1c21b;
+  --hazard-warning: #ff832b;
+  --hazard-danger: #fa4d56;
+  --hazard-danger-strong: #da1e28;
+
+  --state-normal: #42be65;
+  --state-offline: #be95ff;
+  --state-offline-bg: #2a2140;
+  --state-unverified: #ff7eb6;
+
+  --text-on-hazard-danger: #161616;
+  --text-on-state-offline: #161616;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--text-primary);
+  font-family: var(--font-sans); line-height: 1.5; font-size: 1rem; }
+main { max-width: 60rem; margin: 0 auto; padding: var(--space-05); }
+a { color: var(--link); }
+h1 { font-size: 1.6rem; margin-bottom: var(--space-02); }
+h2 { font-size: 1.15rem; margin: var(--space-07) 0 var(--space-03); }
+p { margin-bottom: var(--space-03); }
+.tagline { color: var(--text-secondary); }
+.notice { border: 2px solid var(--text-primary); padding: var(--space-04);
+  margin: var(--space-05) 0; font-weight: 600; }
+.chip { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 1rem;
+  font-weight: 700; font-size: 0.85rem; border: 1.5px solid currentColor;
+  white-space: nowrap; }
+.chip-live { color: var(--state-normal); }
+.chip-offline { color: var(--state-offline); background: var(--state-offline-bg); }
+.chip-unverified { color: var(--state-unverified); }
+.corridor { border: 1px solid var(--border-subtle); border-left: 6px solid
+  var(--state-offline); padding: var(--space-04); margin: var(--space-03) 0;
+  background: var(--bg-layer); }
+.corridor.status-normal { border-left-color: var(--state-normal); }
+.corridor.status-unverified { border-left-color: var(--state-unverified); }
+.corridor .note { color: var(--text-secondary); font-size: 0.9rem; }
+.offline-hero { border: 2px solid var(--state-offline);
+  background: var(--state-offline-bg); padding: var(--space-05);
+  margin: var(--space-05) 0; }
+figure { margin: var(--space-04) 0; }
+.scroll { overflow-x: auto; }
+figcaption, .meta { color: var(--text-secondary); font-size: 0.85rem;
+  margin-top: var(--space-02); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+caption { text-align: left; color: var(--text-secondary); font-size: 0.85rem;
+  margin-bottom: var(--space-02); }
+th, td { text-align: left; padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 600; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); }
+footer { margin: var(--space-08) 0 var(--space-05);
+  border-top: 1px solid var(--border-subtle); padding-top: var(--space-04);
+  color: var(--text-secondary); font-size: 0.9rem; }
+#stale-banner { display: none; }
+body.stale #stale-banner { display: block; }
+svg text { font-family: var(--font-sans); }
+</style></head><body><main><h1>404 — this path is not watched</h1>
+<p>Nothing exists here, and in this project an absence must be loud:</p>
+<p><span class="chip chip-offline">⊘ OFFLINE — no such page</span></p>
+<p>Try the <a href="/Himalayashield/">workbench</a>, the
+<a href="/Himalayashield/console/">operations console</a>, or the
+<a href="https://github.com/8h45k4r/Himalayashield">repository</a>.</p></main></body></html>
